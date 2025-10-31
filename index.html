@@ -1,77 +1,49 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atendimento COP - Ligga Telecom</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrap">
-    <h1>Atendimento COP - Ligga Telecom</h1>
+  <h1>Atendimento COP - Ligga Telecom</h1>
 
-    <div class="panel stats">
-      <div class="badge info">Aguardando: <span id="contAguardando">0</span></div>
-      <div class="badge ok">Confirmado: <span id="contConfirmado">0</span></div>
-      <div class="badge warn">Reagendado: <span id="contReagendado">0</span></div>
-      <div class="badge err">Cancelado: <span id="contCancelado">0</span></div>
-    </div>
-
-    <div class="panel controls">
-      <div class="row">
-        <input id="inputContrato" placeholder="Contrato">
-        <input id="inputCliente" placeholder="Cliente">
-        <input id="inputCelular" placeholder="Celular (somente números)">
-        <input id="inputData" type="date" placeholder="Data Agendamento">
-        <input id="inputEndereco" placeholder="Endereço">
-        <input id="inputBairro" placeholder="Bairro">
-        <button id="btnAdd">➕ Adicionar</button>
-      </div>
-
-      <div class="row" style="margin-top:8px;align-items:center">
-        <label>Modelo:</label>
-        <select id="tipoMensagem">
-          <option value="antecipacao">Antecipar atendimento</option>
-          <option value="confirmacao">Confirmar agendamento</option>
-          <option value="chegada">Técnico em frente</option>
-        </select>
-
-        <input id="fileInput" type="file" accept=".csv" />
-        <input id="filtro" placeholder="Buscar contrato/cliente" />
-        <button id="btnSelectAll">Selecionar Todos</button>
-        <button id="btnPreviewSel">Pré-visualizar Selecionados</button>
-        <button id="btnSendSel">Enviar Selecionados</button>
-        <button id="btnExport">Exportar CSV</button>
-      </div>
-
-      <div class="note">CSV esperado (ex): Contrato,Cliente,Celular,Data Agendamento,Endereço,Bairro</div>
-    </div>
-
-    <div class="panel table-wrap">
-      <table id="tabela">
-        <thead>
-          <tr>
-            <th><input id="selTop" type="checkbox"></th>
-            <th>Contrato</th>
-            <th>Cliente</th>
-            <th>Celular</th>
-            <th>Data</th>
-            <th>Período</th>
-            <th>Endereço</th>
-            <th>Bairro</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaBody"></tbody>
-      </table>
-    </div>
+  <div class="upload-section">
+    <label for="fileInput">📂 Importar planilha CSV:</label>
+    <input type="file" id="fileInput" accept=".csv">
+    <button id="exportarBtn">💾 Exportar Planilha</button>
   </div>
 
-  <!-- libs -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div class="status-counters">
+    <div id="aguardando" class="status-card aguardando">Aguardando: 0</div>
+    <div id="confirmado" class="status-card confirmado">Confirmado: 0</div>
+    <div id="reagendado" class="status-card reagendado">Reagendado: 0</div>
+    <div id="cancelado" class="status-card cancelado">Cancelado: 0</div>
+  </div>
 
+  <div class="filtro">
+    <input type="text" id="filtroContrato" placeholder="🔍 Buscar por contrato...">
+  </div>
+
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Contrato</th>
+        <th>Cliente</th>
+        <th>Celular</th>
+        <th>Data Agendamento</th>
+        <th>Endereço</th>
+        <th>Bairro</th>
+        <th>Período</th>
+        <th>Status</th>
+        <th>Mensagem</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
