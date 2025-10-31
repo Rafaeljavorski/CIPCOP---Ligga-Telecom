@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Cria elementos básicos se não existirem
   if (!document.getElementById("fileInput")) {
     const input = document.createElement("input");
     input.type = "file";
@@ -35,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fileInput = document.getElementById("fileInput");
   fileInput.addEventListener("change", handleFileUpload);
 
-  // Detecta automaticamente a área da tabela
   let corpoTabela;
   if (tabela.tagName === "TABLE") {
     corpoTabela = tabela.querySelector("tbody");
@@ -144,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("📩 Prévia da mensagem:\n\n" + msg);
   };
 
+  // ✅ Envio ajustado: usa a mesma aba/app do WhatsApp
   window.enviarWhatsApp = function (i) {
     const d = dados[i];
     let phone = d.celular.replace(/\D/g, "");
@@ -167,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
-    window.open(url, "_self");
+    window.open(url, "_self"); // 🔥 mantém no mesmo app/aba
     alterarStatus(i, "Confirmado");
   };
 
@@ -189,4 +188,3 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
-
