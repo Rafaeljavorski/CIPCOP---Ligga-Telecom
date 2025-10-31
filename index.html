@@ -306,7 +306,13 @@ function enviarPara(i){
   const msg = montarMensagem(c);
   const mesma = document.getElementById('usarMesmaAba').checked;
   const target = mesma ? 'whatsapp' : '_blank';
-  window.open(`https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`, target);
+ const link = `whatsapp://send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
+try {
+  window.location.assign(link);
+} catch (e) {
+  navigator.clipboard.writeText(msg);
+  alert("⚠️ Mensagem copiada — cole no WhatsApp já aberto.");
+}
   c.status = 'Mensagem enviada';
   salvarLocal(); setTimeout(()=>atualizarTabela(),300);
 }
