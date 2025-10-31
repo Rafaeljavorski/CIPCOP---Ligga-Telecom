@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
-    window.location.href = url;
+    window.open(url, "_self");
     alterarStatus(i, "Confirmado");
   };
 
@@ -189,3 +189,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
+
