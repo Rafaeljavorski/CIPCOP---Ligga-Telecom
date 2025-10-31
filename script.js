@@ -4,19 +4,22 @@ let dados = [];
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
-  if (!file) return alert("Nenhum arquivo selecionado!");
+  if (!file) {
+    alert("Nenhum arquivo selecionado!");
+    return;
+  }
 
   const reader = new FileReader();
   reader.onload = function(e) {
     const text = e.target.result;
 
-    // Detecta automaticamente o separador ("," ou ";")
+    // Detecta automaticamente o separador
     const separador = text.includes(";") ? ";" : ",";
     const linhas = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
     const cabecalho = linhas[0].split(separador).map(c => c.trim());
     const linhasDados = linhas.slice(1);
 
-    // Campos esperados
+    // Colunas esperadas
     const camposEsperados = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro"];
     const indices = camposEsperados.map(campo => cabecalho.indexOf(campo));
 
@@ -25,7 +28,6 @@ function handleFileUpload(event) {
       return;
     }
 
-    // Lê cada linha e cria um objeto
     dados = linhasDados.map(linha => {
       const cols = linha.split(separador);
       return {
@@ -37,7 +39,7 @@ function handleFileUpload(event) {
         bairro: cols[indices[5]]?.trim() || "",
         status: "Aguardando"
       };
-    }).filter(d => d.contrato && d.celular); // evita linhas vazias
+    }).filter(d => d.contrato && d.celular);
 
     if (dados.length === 0) {
       alert("Nenhum dado válido encontrado no CSV!");
@@ -52,7 +54,6 @@ function handleFileUpload(event) {
   reader.readAsText(file, "UTF-8");
 }
 
-// Atualiza tabela na tela
 function atualizarTabela() {
   const tabela = document.getElementById("tabelaDados");
   if (!tabela) return;
