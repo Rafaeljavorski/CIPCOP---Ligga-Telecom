@@ -165,7 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
+    const link = `https://api.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
+
 
     try {
       window.location.assign(url);
@@ -201,3 +202,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
+
