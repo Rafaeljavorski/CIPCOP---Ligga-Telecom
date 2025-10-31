@@ -1,26 +1,56 @@
-:root{
-  --primary:#2563eb; --bg:#f6f7fb; --card:#ffffff; --text:#0b1220;
-  --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --info:#3b82f6;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #eee;
+  margin: 20px;
 }
-*{box-sizing:border-box}
-body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:12px;color:var(--text)}
-.wrap{max-width:1200px;margin:0 auto}
-h1{color:var(--primary);text-align:center;margin-bottom:10px;font-size:20px}
-.panel{background:var(--card);padding:12px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.06);margin-bottom:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,textarea,button{padding:8px;border-radius:6px;border:1px solid #d1d5db;font-size:14px}
-button{background:var(--primary);color:#fff;border:none;cursor:pointer}
-button.ghost{background:#fff;color:var(--primary);border:1px solid var(--primary)}
-.table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse}
-th,td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left;font-size:13px}
-th{background:var(--primary);color:#fff;position:sticky;top:0}
-tr:nth-child(even){background:#fbfdff}
-.stats{display:flex;gap:10px;justify-content:flex-start;margin-bottom:8px;flex-wrap:wrap}
-.badge{padding:8px 12px;border-radius:10px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.04);font-weight:600}
-.badge.info{color:var(--info)}
-.badge.ok{color:var(--ok)}
-.badge.warn{color:var(--warn)}
-.badge.err{color:var(--err)}
-.note{font-size:12px;color:#6b7280;margin-top:8px}
-@media(max-width:900px){ .row{flex-direction:column;align-items:stretch} }
+
+h1 {
+  text-align: center;
+  color: #00bcd4;
+}
+
+.upload-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.status-counters {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.status-card {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  width: 20%;
+  text-align: center;
+}
+
+.aguardando { background: #555; color: white; }
+.confirmado { background: #2ecc71; color: white; }
+.reagendado { background: #f1c40f; color: black; }
+.cancelado  { background: #e74c3c; color: white; }
+
+.filtro {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #00bcd4;
+  color: #000;
+}
