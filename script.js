@@ -1,123 +1,191 @@
-document.getElementById("csvFile").addEventListener("change", handleFileUpload);
+document.addEventListener("DOMContentLoaded", () => {
+  let dados = [];
+  let tabela = document.querySelector("table") || document.getElementById("tabela") || document.getElementById("tabelaBody");
 
-let dados = [];
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) {
-    alert("Nenhum arquivo selecionado!");
+  if (!tabela) {
+    const msg = document.createElement("p");
+    msg.textContent = "❌ Nenhuma tabela encontrada no HTML.";
+    document.body.appendChild(msg);
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const text = e.target.result;
+  // Cria elementos básicos se não existirem
+  if (!document.getElementById("fileInput")) {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".csv";
+    input.id = "fileInput";
+    input.style.marginBottom = "10px";
+    document.body.insertBefore(input, tabela);
+  }
 
-    // Detecta automaticamente o separador
-    const separador = text.includes(";") ? ";" : ",";
-    const linhas = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-    const cabecalho = linhas[0].split(separador).map(c => c.trim());
-    const linhasDados = linhas.slice(1);
+  if (!document.getElementById("contadores")) {
+    const div = document.createElement("div");
+    div.id = "contadores";
+    div.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <span>🕓 Aguardando: <strong id="contadorAguardando">0</strong></span>
+        <span>✅ Confirmado: <strong id="contadorConfirmado">0</strong></span>
+        <span>📅 Reagendado: <strong id="contadorReagendado">0</strong></span>
+        <span>❌ Cancelado: <strong id="contadorCancelado">0</strong></span>
+      </div>`;
+    document.body.insertBefore(div, tabela);
+  }
 
-    // 🔍 Mostra diagnóstico na tela
-    const diagnosticoDiv = document.getElementById("diagnostico") || criarDiagnostico();
-    diagnosticoDiv.innerHTML = `
-      <h3>🔎 Diagnóstico do CSV</h3>
-      <p><strong>Separador detectado:</strong> "${separador}"</p>
-      <p><strong>Cabeçalho:</strong> ${cabecalho.join(" | ")}</p>
-      <p><strong>Primeiras linhas:</strong></p>
-      <pre>${linhas.slice(0, 5).join("\n")}</pre>
-    `;
+  const fileInput = document.getElementById("fileInput");
+  fileInput.addEventListener("change", handleFileUpload);
 
-    // Colunas esperadas
-    const camposEsperados = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro"];
-    const indices = camposEsperados.map(campo => cabecalho.indexOf(campo));
+  // Detecta automaticamente a área da tabela
+  let corpoTabela;
+  if (tabela.tagName === "TABLE") {
+    corpoTabela = tabela.querySelector("tbody");
+    if (!corpoTabela) {
+      corpoTabela = document.createElement("tbody");
+      tabela.appendChild(corpoTabela);
+    }
+  } else {
+    corpoTabela = tabela;
+  }
 
-    if (indices.includes(-1)) {
-      alert("⚠️ Colunas inválidas! Verifique se o CSV contém: " + camposEsperados.join(", "));
-      return;
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return alert("Nenhum arquivo selecionado!");
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const text = e.target.result;
+      const separador = text.includes(";") ? ";" : ",";
+      const linhas = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      const cabecalho = linhas[0].split(separador).map(c => c.trim());
+      const linhasDados = linhas.slice(1);
+
+      const camposEsperados = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro"];
+      const indices = camposEsperados.map(campo => cabecalho.indexOf(campo));
+
+      if (indices.includes(-1)) {
+        alert("⚠️ Colunas inválidas! Esperado: " + camposEsperados.join(", "));
+        return;
+      }
+
+      dados = linhasDados.map(linha => {
+        const cols = linha.split(separador);
+        return {
+          contrato: cols[indices[0]]?.trim() || "",
+          cliente: cols[indices[1]]?.trim() || "",
+          celular: cols[indices[2]]?.trim() || "",
+          data: cols[indices[3]]?.trim() || "",
+          endereco: cols[indices[4]]?.trim() || "",
+          bairro: cols[indices[5]]?.trim() || "",
+          status: "Aguardando",
+          periodo: "Tarde"
+        };
+      }).filter(d => d.contrato && d.celular);
+
+      if (dados.length === 0) return alert("Nenhum dado válido encontrado!");
+
+      alert("✅ Planilha importada com sucesso!");
+      atualizarTabela();
+      atualizarContadores();
+    };
+
+    reader.readAsText(file, "UTF-8");
+  }
+
+  function atualizarTabela() {
+    corpoTabela.innerHTML = "";
+    dados.forEach((d, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.contrato}</td>
+        <td>${d.cliente}</td>
+        <td>${d.celular}</td>
+        <td>${d.data}</td>
+        <td>${d.endereco}</td>
+        <td>${d.bairro}</td>
+        <td>${d.status}</td>
+        <td>
+          <select id="periodo_${i}">
+            <option ${d.periodo === "Manhã" ? "selected" : ""}>Manhã</option>
+            <option ${d.periodo === "Tarde" ? "selected" : ""}>Tarde</option>
+            <option ${d.periodo === "Noite" ? "selected" : ""}>Noite</option>
+          </select>
+        </td>
+        <td>
+          <button onclick="previewMensagem(${i})">Prévia</button>
+          <button onclick="enviarWhatsApp(${i})">Enviar</button>
+          <button onclick="alterarStatus(${i},'Confirmado')">✅</button>
+          <button onclick="alterarStatus(${i},'Reagendado')">📅</button>
+          <button onclick="alterarStatus(${i},'Cancelado')">❌</button>
+        </td>
+      `;
+      corpoTabela.appendChild(tr);
+    });
+  }
+
+  window.previewMensagem = function (i) {
+    const d = dados[i];
+    const tipo = prompt("Escolha o tipo de mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico em frente", "1");
+    let msg = "";
+
+    switch (tipo) {
+      case "1":
+        msg = `Olá, Prezado(a) Cliente Ligga!\nAqui é do agendamento da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a oportunidade de antecipar o seu atendimento para hoje!\n\n📅 Data: ${d.data}\n⏰ Período: ${d.periodo}\n\nPodemos confirmar a antecipação de agenda? ✅\n1. CONFIRMAR\n2. PERMANECER DATA ATUAL AGENDADA\n(Nosso sistema não suporta chamadas e áudios)`;
+        break;
+      case "2":
+        msg = `Olá, tudo bem?\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${d.data}\n\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nObs.: Nosso sistema não aceita áudios ou chamadas telefônicas.\nAguardamos sua resposta!\nEquipe Ligga Telecom`;
+        break;
+      case "3":
+        msg = `Um técnico a serviço da Ligga Telecom está em frente à sua residência para realizar a visita técnica.\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️`;
+        break;
+      default:
+        msg = "Tipo inválido.";
     }
 
-    dados = linhasDados.map(linha => {
-      const cols = linha.split(separador);
-      return {
-        contrato: cols[indices[0]]?.trim() || "",
-        cliente: cols[indices[1]]?.trim() || "",
-        celular: cols[indices[2]]?.trim() || "",
-        data: cols[indices[3]]?.trim() || "",
-        endereco: cols[indices[4]]?.trim() || "",
-        bairro: cols[indices[5]]?.trim() || "",
-        status: "Aguardando"
-      };
-    }).filter(d => d.contrato && d.celular);
+    alert("📩 Prévia da mensagem:\n\n" + msg);
+  };
 
-    if (dados.length === 0) {
-      alert("Nenhum dado válido encontrado no CSV!");
-      return;
+  window.enviarWhatsApp = function (i) {
+    const d = dados[i];
+    let phone = d.celular.replace(/\D/g, "");
+    if (!phone.startsWith("55")) phone = "55" + phone;
+    const tipo = prompt("Escolha a mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico em frente", "1");
+    let mensagem = "";
+
+    switch (tipo) {
+      case "1":
+        mensagem = `Olá, Prezado(a) Cliente Ligga!\nAqui é do agendamento da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a oportunidade de antecipar o seu atendimento para hoje!\n\n📅 Data: ${d.data}\n⏰ Período: ${d.periodo}\n\nPodemos confirmar a antecipação de agenda? ✅\n1. CONFIRMAR\n2. PERMANECER DATA ATUAL AGENDADA\n(Nosso sistema não suporta chamadas e áudios)`;
+        break;
+      case "2":
+        mensagem = `Olá, tudo bem?\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${d.data}\n\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nObs.: Nosso sistema não aceita áudios ou chamadas telefônicas.\nAguardamos sua resposta!\nEquipe Ligga Telecom`;
+        break;
+      case "3":
+        mensagem = `Um técnico a serviço da Ligga Telecom está em frente à sua residência para realizar a visita técnica.\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️`;
+        break;
+      default:
+        alert("Tipo inválido.");
+        return;
     }
 
-    alert("✅ Planilha importada com sucesso!");
+    const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
+    window.location.href = url;
+    alterarStatus(i, "Confirmado");
+  };
+
+  window.alterarStatus = function (i, status) {
+    dados[i].status = status;
     atualizarTabela();
     atualizarContadores();
   };
 
-  reader.readAsText(file, "UTF-8");
-}
+  function atualizarContadores() {
+    const aguardando = dados.filter(d => d.status === "Aguardando").length;
+    const confirmados = dados.filter(d => d.status === "Confirmado").length;
+    const reagendados = dados.filter(d => d.status === "Reagendado").length;
+    const cancelados = dados.filter(d => d.status === "Cancelado").length;
 
-// Cria a área de diagnóstico se não existir
-function criarDiagnostico() {
-  const div = document.createElement("div");
-  div.id = "diagnostico";
-  div.style.background = "#222";
-  div.style.color = "#fff";
-  div.style.padding = "10px";
-  div.style.marginTop = "10px";
-  div.style.borderRadius = "8px";
-  div.style.fontFamily = "monospace";
-  document.body.insertBefore(div, document.getElementById("tabelaDados"));
-  return div;
-}
-
-// Atualiza tabela na tela
-function atualizarTabela() {
-  const tabela = document.getElementById("tabelaDados");
-  if (!tabela) return;
-
-  tabela.innerHTML = `
-    <tr>
-      <th>Contrato</th>
-      <th>Cliente</th>
-      <th>Celular</th>
-      <th>Data Agendamento</th>
-      <th>Endereço</th>
-      <th>Bairro</th>
-      <th>Status</th>
-    </tr>
-  `;
-
-  dados.forEach(d => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.contrato}</td>
-      <td>${d.cliente}</td>
-      <td>${d.celular}</td>
-      <td>${d.data}</td>
-      <td>${d.endereco}</td>
-      <td>${d.bairro}</td>
-      <td>${d.status}</td>
-    `;
-    tabela.appendChild(tr);
-  });
-}
-
-function atualizarContadores() {
-  let aguardando = dados.filter(d => d.status === "Aguardando").length;
-  let confirmados = dados.filter(d => d.status === "Confirmado").length;
-  let cancelados = dados.filter(d => d.status === "Cancelado").length;
-  let reagendados = dados.filter(d => d.status === "Reagendado").length;
-
-  document.getElementById("contadorAguardando").innerText = aguardando;
-  document.getElementById("contadorConfirmado").innerText = confirmados;
-  document.getElementById("contadorCancelado").innerText = cancelados;
-  document.getElementById("contadorReagendado").innerText = reagendados;
-}
+    document.getElementById("contadorAguardando").innerText = aguardando;
+    document.getElementById("contadorConfirmado").innerText = confirmados;
+    document.getElementById("contadorReagendado").innerText = reagendados;
+    document.getElementById("contadorCancelado").innerText = cancelados;
+  }
+});
