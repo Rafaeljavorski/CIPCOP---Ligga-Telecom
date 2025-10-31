@@ -306,7 +306,20 @@ function enviarPara(i){
   const msg = montarMensagem(c);
   const mesma = document.getElementById('usarMesmaAba').checked;
   const target = mesma ? 'whatsapp' : '_blank';
-  window.open(`https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`, target);
+  const link = `whatsapp://send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
+try {
+  window.location.assign(link);
+  setTimeout(() => {
+    if (document.visibilityState !== "hidden") {
+      navigator.clipboard.writeText(msg);
+      alert("⚠️ O navegador bloqueou a abertura direta.\nMensagem copiada — basta colar no WhatsApp já aberto.");
+    }
+  }, 1500);
+} catch (e) {
+  navigator.clipboard.writeText(msg);
+  alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — basta colar no app.");
+}
+
   c.status = 'Mensagem enviada';
   salvarLocal(); setTimeout(()=>atualizarTabela(),300);
 }
