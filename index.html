@@ -1,49 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Atendimento COP - Ligga Telecom</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Atendimento COP - Ligga Telecom</h1>
+  <div class="wrap">
+    <h1>Atendimento COP - Ligga Telecom</h1>
 
-  <div class="upload-section">
-    <label for="fileInput">📂 Importar planilha CSV:</label>
-    <input type="file" id="fileInput" accept=".csv">
-    <button id="exportarBtn">💾 Exportar Planilha</button>
+    <div class="panel controls">
+      <div class="row">
+        <label for="fileInput" class="file-label">📂 Importar planilha CSV</label>
+        <input id="fileInput" type="file" accept=".csv" />
+        <button id="btnExport" class="small-btn">📤 Exportar CSV</button>
+        <input id="filtro" placeholder="🔎 Buscar por contrato ou cliente" />
+        <select id="tipoMensagem" title="Modelo de mensagem">
+          <option value="antecipacao">Antecipar atendimento</option>
+          <option value="confirmacao">Confirmar agendamento</option>
+          <option value="chegada">Técnico em frente</option>
+        </select>
+      </div>
+      <div class="note">CSV esperado: contém colunas com nomes semelhantes a <strong>Contrato, Cliente/Nome, Celular/Telefone, Data Agendada, Endereço, Bairro, Status</strong>. Aceita variações e acentos.</div>
+    </div>
+
+    <div class="panel stats">
+      <div class="badge info">Aguardando: <span id="contAguardando">0</span></div>
+      <div class="badge ok">Confirmado: <span id="contConfirmado">0</span></div>
+      <div class="badge warn">Reagendado: <span id="contReagendado">0</span></div>
+      <div class="badge err">Cancelado: <span id="contCancelado">0</span></div>
+    </div>
+
+    <div class="panel table-wrap">
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th class="sel-col"><input id="selAllTop" type="checkbox" /></th>
+            <th>Contrato</th>
+            <th>Nome</th>
+            <th>Celular</th>
+            <th>Data Agendada</th>
+            <th>Endereço</th>
+            <th>Bairro</th>
+            <th>Período</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaBody"></tbody>
+      </table>
+    </div>
+
   </div>
 
-  <div class="status-counters">
-    <div id="aguardando" class="status-card aguardando">Aguardando: 0</div>
-    <div id="confirmado" class="status-card confirmado">Confirmado: 0</div>
-    <div id="reagendado" class="status-card reagendado">Reagendado: 0</div>
-    <div id="cancelado" class="status-card cancelado">Cancelado: 0</div>
-  </div>
+  <!-- dependency to parse CSV in-browser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <div class="filtro">
-    <input type="text" id="filtroContrato" placeholder="🔍 Buscar por contrato...">
-  </div>
-
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th>Contrato</th>
-        <th>Cliente</th>
-        <th>Celular</th>
-        <th>Data Agendamento</th>
-        <th>Endereço</th>
-        <th>Bairro</th>
-        <th>Período</th>
-        <th>Status</th>
-        <th>Mensagem</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
