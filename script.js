@@ -165,8 +165,24 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
-    window.open(url, "_self"); // 🔥 mantém no mesmo app/aba
+   const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
+
+try {
+  // Tenta abrir o app diretamente
+  window.location.assign(url);
+  
+  // Se o navegador bloquear o link, oferece opção de copiar
+  setTimeout(() => {
+    if (document.visibilityState !== "hidden") {
+      navigator.clipboard.writeText(mensagem);
+      alert("⚠️ O navegador bloqueou a abertura direta.\nMensagem copiada — basta colar no WhatsApp já aberto.");
+    }
+  }, 1500);
+} catch (e) {
+  navigator.clipboard.writeText(mensagem);
+  alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — basta colar no app.");
+}
+
     alterarStatus(i, "Confirmado");
   };
 
@@ -188,3 +204,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
+
