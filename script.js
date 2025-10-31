@@ -1,183 +1,390 @@
-// Array global para armazenar os dados importados
-let dados = [];
+// VARIÁVEIS GLOBAIS
+// O array principal de dados de atendimento
+let dadosAtendimento = [];
+// As colunas que o CSV deve ter
+const CAMPOS_CSV_ESPERADOS = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro", "Período"];
+// As mensagens de WhatsApp (Pode ser estendido ou movido para JSON)
+const MENSAGENS = {
+    antecipacao: "Olá [NOME] da [CONTRATO], somos da Ligga. Notamos que seu agendamento de [Data Agendamento] pode ser antecipado. Confirma?",
+    confirmacao: "Olá [NOME] da [CONTRATO], somos da Ligga. Confirmamos o agendamento do técnico para [Data Agendamento] no [PERIODO] no endereço [ENDERECO].",
+    chegada: "Olá [NOME], o técnico [BAIRRO] já está em frente à sua residência para o atendimento [CONTRATO]."
+};
+let selecionarTodosEstado = false; // Estado do botão 'Selecionar Todos'
 
-// Função para anexar event listeners e iniciar o script após o DOM carregar
+// ----------------------------------------------------------------------
+// 1. INICIALIZAÇÃO E EVENTOS
+// ----------------------------------------------------------------------
+
 document.addEventListener("DOMContentLoaded", function() {
-    const csvFileInput = document.getElementById("csvFile");
-    if (csvFileInput) {
-        csvFileInput.addEventListener("change", handleFileUpload);
-        console.log("Event listener anexado ao #csvFile.");
-    } else {
-        console.error("ERRO: Elemento com ID 'csvFile' não encontrado no HTML.");
+    // Anexa listeners para os inputs de filtro e seleção.
+    // O listener de CSV está no HTML: onchange="importarCSV(event)"
+    const filtroInput = document.getElementById("filtroContrato");
+    if (filtroInput) {
+        filtroInput.addEventListener("input", filtrarTabela);
     }
-
-    // Inicializa a tabela e contadores caso já haja dados (opcional, mas bom)
-    // atualizarTabela(); 
-    // atualizarContadores();
+    
+    // Simula a carga inicial dos dados (para teste)
+    // Se você usa localStorage, carregaria aqui.
+    // dadosAtendimento = JSON.parse(localStorage.getItem('dadosAtendimento')) || [];
+    // atualizarDashboard(); 
 });
 
 
+// ----------------------------------------------------------------------
+// 2. IMPORTAÇÃO E PROCESSAMENTO CSV (Requer Papa Parse)
+// ----------------------------------------------------------------------
+
 /**
- * Manipula o upload do arquivo CSV, lê o conteúdo e chama as funções de processamento.
- * @param {Event} event - O evento 'change' do input de arquivo.
+ * Função chamada pelo onchange do input #arquivoCSV no HTML.
+ * @param {Event} event - O evento de mudança de arquivo.
  */
-function handleFileUpload(event) {
+function importarCSV(event) {
     const file = event.target.files[0];
     if (!file) {
         alert("Nenhum arquivo selecionado!");
         return;
     }
 
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const text = e.target.result;
-        processarCSV(text);
-    };
+    // Verifica se Papa Parse está carregado
+    if (typeof Papa === 'undefined') {
+        alert("Erro: A biblioteca Papa Parse não foi carregada. Verifique o link <script> no seu HTML.");
+        return;
+    }
 
-    reader.onerror = function() {
-        alert("Erro ao ler o arquivo.");
-        console.error("Erro na leitura do arquivo:", reader.error);
-    };
-
-    // Tenta ler o arquivo como UTF-8 para melhor compatibilidade com acentuação
-    reader.readAsText(file, "UTF-8");
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        encoding: "utf-8", // Tenta UTF-8 para acentuação
+        complete: function(results) {
+            processarDadosCSV(results.data);
+            // Limpa o input para permitir carregar o mesmo arquivo novamente
+            event.target.value = ''; 
+        },
+        error: function(error) {
+            console.error("Erro ao ler CSV:", error);
+            alert("Falha ao ler o arquivo CSV. Verifique o formato e tente novamente.");
+        }
+    });
 }
 
+/**
+ * Processa e valida os dados lidos pelo Papa Parse.
+ * @param {Array<Object>} dadosLidos - Dados brutos lidos.
+ */
+function processarDadosCSV(dadosLidos) {
+    const cabecalho = dadosLidos.length > 0 ? Object.keys(dadosLidos[0]) : [];
+
+    // Valida se as colunas esperadas existem
+    const colunasFaltando = CAMPOS_CSV_ESPERADOS.filter(campo => !cabecalho.includes(campo));
+    if (colunasFaltando.length > 0) {
+        alert(`Colunas inválidas no CSV! Faltam: ${colunasFaltando.join(", ")}. Verifique o cabeçalho.`);
+        return;
+    }
+
+    // Mapeia e filtra os dados
+    const novosDados = dadosLidos
+        .map(d => ({
+            // Mapeamento e limpeza (trim) dos campos
+            contrato: d["Contrato"]?.trim() || "",
+            cliente: d["Cliente"]?.trim() || "",
+            celular: d["Celular"]?.trim() || "",
+            data: d["Data Agendamento"]?.trim() || "",
+            periodo: d["Período"]?.trim() || "Comercial", // Assume padrão se vazio
+            endereco: d["Endereço"]?.trim() || "",
+            bairro: d["Bairro"]?.trim() || "",
+            // Campos de controle
+            status: d["Status"]?.trim() || "Aguardando", // Mantém status do CSV, senão 'Aguardando'
+            selecionado: false,
+            id: Date.now() + Math.random() // ID único
+        }))
+        .filter(d => d.contrato && d.celular); // Filtra por campos essenciais
+
+    if (novosDados.length === 0) {
+        alert("Nenhum dado válido encontrado no CSV! Verifique as colunas 'Contrato' e 'Celular'.");
+        return;
+    }
+
+    dadosAtendimento = novosDados; // Substitui os dados
+    alert(`Importação concluída: ${dadosAtendimento.length} registros carregados.`);
+    atualizarDashboard();
+}
+
+// ----------------------------------------------------------------------
+// 3. GERENCIAMENTO DE DADOS (Adicionar / Limpar / Exportar)
+// ----------------------------------------------------------------------
+
+function adicionarCliente() {
+    const contrato = document.getElementById("inputContrato").value.trim();
+    const cliente = document.getElementById("inputCliente").value.trim();
+    const celular = document.getElementById("inputCelular").value.trim();
+    const data = document.getElementById("inputData").value.trim();
+    const endereco = document.getElementById("inputEndereco").value.trim();
+    const bairro = document.getElementById("inputBairro").value.trim();
+    
+    // Adicione mais validações aqui, se necessário (ex: formato de celular)
+    if (!contrato || !cliente || !celular || !data) {
+        alert("Preencha Contrato, Cliente, Celular e Data para adicionar.");
+        return;
+    }
+
+    const novoCliente = {
+        contrato, cliente, celular, data, endereco, bairro,
+        periodo: "Manhã", // Padrão, pode ser um input também
+        status: "Aguardando",
+        selecionado: false,
+        id: Date.now() + Math.random()
+    };
+
+    dadosAtendimento.push(novoCliente);
+    // Limpar os inputs após adicionar
+    document.querySelectorAll('.panel input:not([type="file"]):not([type="date"]), .panel textarea').forEach(input => input.value = '');
+
+    atualizarDashboard();
+}
+
+function limparTodos() {
+    if (confirm("Tem certeza que deseja limpar TODOS os dados?")) {
+        dadosAtendimento = [];
+        atualizarDashboard();
+    }
+}
+
+function limparSelecionados() {
+    if (dadosAtendimento.some(d => d.selecionado) && confirm("Tem certeza que deseja EXCLUIR os clientes selecionados?")) {
+        dadosAtendimento = dadosAtendimento.filter(d => !d.selecionado);
+        atualizarDashboard();
+    }
+}
+
+function exportarCSV() {
+    // Prepara os dados para exportação (remove campos internos como 'selecionado' e 'id')
+    const dadosParaExportar = dadosAtendimento.map(d => ({
+        "Contrato": d.contrato,
+        "Cliente": d.cliente,
+        "Celular": d.celular,
+        "Data Agendamento": d.data,
+        "Período": d.periodo,
+        "Endereço": d.endereco,
+        "Bairro": d.bairro,
+        "Status": d.status
+    }));
+
+    // Requer Papa Parse
+    if (typeof Papa === 'undefined') {
+        alert("Erro: Papa Parse é necessário para exportar CSV.");
+        return;
+    }
+
+    const csv = Papa.unparse(dadosParaExportar, {
+        quotes: true,
+        delimiter: ";", // Usa ponto e vírgula como padrão de exportação
+        header: true
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "dados_ligga_export_" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ----------------------------------------------------------------------
+// 4. ATUALIZAÇÃO DA INTERFACE (Dashboard, Tabela, Contadores)
+// ----------------------------------------------------------------------
 
 /**
- * Processa o texto do CSV, extrai os dados e atualiza a interface.
- * @param {string} text - O conteúdo de texto do arquivo CSV.
+ * Ponto central de atualização da interface.
  */
-function processarCSV(text) {
-    // 1. Detecta automaticamente o separador (ponto e vírgula ou vírgula)
-    const separador = text.includes(";") ? ";" : ",";
-    
-    // 2. Limpa e divide as linhas
-    // Usa uma regex para lidar com diferentes quebras de linha (\r\n, \r, \n) e remove linhas vazias
-    const linhas = text.split(/[\r\n]+/)
-                       .map(l => l.trim())
-                       .filter(l => l.length > 0);
-    
-    if (linhas.length === 0) {
-        alert("O arquivo CSV está vazio.");
-        return;
-    }
-
-    // 3. Processa Cabeçalho
-    const cabecalho = linhas[0].split(separador).map(c => c.trim());
-    const linhasDados = linhas.slice(1);
-
-    // 4. Define e mapeia colunas esperadas
-    const camposEsperados = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro"];
-    const indices = camposEsperados.map(campo => cabecalho.indexOf(campo));
-
-    if (indices.includes(-1)) {
-        alert("Colunas inválidas! Verifique se o CSV contém: " + camposEsperados.join(", "));
-        console.error("Cabeçalho lido:", cabecalho);
-        return;
-    }
-
-    // 5. Mapeia as linhas para o array de objetos 'dados'
-    dados = linhasDados.map(linha => {
-        const cols = linha.split(separador);
-        
-        // Usa desestruturação para garantir que o acesso ao índice não cause erro
-        // e garante que o valor seja trimado (removido espaços) ou seja uma string vazia
-        return {
-            contrato: cols[indices[0]]?.trim() || "",
-            cliente: cols[indices[1]]?.trim() || "",
-            celular: cols[indices[2]]?.trim() || "",
-            data: cols[indices[3]]?.trim() || "",
-            endereco: cols[indices[4]]?.trim() || "",
-            bairro: cols[indices[5]]?.trim() || "",
-            status: "Aguardando" // Status inicial
-        };
-    })
-    // Filtra linhas que não têm Contrato ou Celular (dados inválidos/incompletos)
-    .filter(d => d.contrato && d.celular);
-
-    if (dados.length === 0) {
-        alert("Nenhum dado válido encontrado no CSV! Verifique se as colunas 'Contrato' e 'Celular' estão preenchidas.");
-        return;
-    }
-
-    console.log(`Importação bem-sucedida! ${dados.length} registros carregados.`);
-    alert("Planilha importada com sucesso!");
-    
-    // 6. Atualiza a interface
+function atualizarDashboard() {
     atualizarTabela();
     atualizarContadores();
+    // Se você tivesse gráficos (Chart.js), chamaria a atualização deles aqui.
 }
 
+/**
+ * Filtra a tabela baseada no input de busca.
+ */
+function filtrarTabela() {
+    atualizarTabela(); // A função atualizarTabela agora lida com o filtro
+}
 
 /**
- * Atualiza o conteúdo da tabela HTML com os dados carregados.
+ * Atualiza o conteúdo da tabela HTML (com filtros e ações).
  */
 function atualizarTabela() {
-    const tabelaBody = document.getElementById("tabelaDados");
-    if (!tabelaBody) {
-        console.error("ERRO: Elemento com ID 'tabelaDados' não encontrado. A tabela não pode ser atualizada.");
-        return;
-    }
+    const tbody = document.querySelector("#tabela tbody");
+    if (!tbody) return;
 
-    // Limpa o conteúdo atual
-    tabelaBody.innerHTML = ''; 
+    const termoBusca = document.getElementById("filtroContrato").value.toLowerCase();
 
-    // Cria o cabeçalho (idealmente, o cabeçalho estaria no <thead> do HTML)
-    const cabecalhoHTML = `
-        <tr>
-            <th>Contrato</th>
-            <th>Cliente</th>
-            <th>Celular</th>
-            <th>Data Agendamento</th>
-            <th>Endereço</th>
-            <th>Bairro</th>
-            <th>Status</th>
-        </tr>
-    `;
-    tabelaBody.innerHTML = cabecalhoHTML;
+    tbody.innerHTML = '';
+    
+    // Filtra antes de renderizar
+    const dadosFiltrados = dadosAtendimento.filter(d => 
+        !termoBusca || 
+        d.contrato.toLowerCase().includes(termoBusca) || 
+        d.cliente.toLowerCase().includes(termoBusca)
+    );
 
-
-    // Adiciona as linhas de dados
-    dados.forEach(d => {
+    dadosFiltrados.forEach(d => {
         const tr = document.createElement("tr");
+        const statusClass = d.status === 'Confirmado' ? 'ok' : d.status === 'Cancelado' ? 'err' : d.status === 'Reagendado' ? 'warn' : 'info';
+
         tr.innerHTML = `
+            <td class="sel-col checkbox-center"><input type="checkbox" onchange="toggleSelecao('${d.id}')" ${d.selecionado ? 'checked' : ''}></td>
             <td>${d.contrato}</td>
             <td>${d.cliente}</td>
             <td>${d.celular}</td>
             <td>${d.data}</td>
+            <td>${d.periodo}</td>
             <td>${d.endereco}</td>
             <td>${d.bairro}</td>
-            <td>${d.status}</td>
+            <td><span class="badge ${statusClass}">${d.status}</span></td>
+            <td>
+                <button class="small-btn info" onclick="enviarWhatsIndividual('${d.id}')">📲 Enviar</button>
+                <button class="small-btn ok" onclick="mudarStatus('${d.id}', 'Confirmado')">✅ Confirmar</button>
+                <button class="small-btn warn" onclick="mudarStatus('${d.id}', 'Reagendado')">🔁 Reagendar</button>
+                <button class="small-btn err" onclick="mudarStatus('${d.id}', 'Cancelado')">❌ Cancelar</button>
+            </td>
         `;
-        tabelaBody.appendChild(tr);
+        tbody.appendChild(tr);
     });
+
+    // Atualiza o checkbox de seleção global
+    const selTodosTop = document.getElementById("selTodosTop");
+    if (selTodosTop) {
+        const todosSelecionados = dadosAtendimento.length > 0 && dadosAtendimento.every(d => d.selecionado);
+        selTodosTop.checked = todosSelecionados;
+        selecionarTodosEstado = todosSelecionados;
+    }
+}
+
+/**
+ * Atualiza os contadores de status.
+ */
+function atualizarContadores() {
+    const contadores = {
+        Aguardando: dadosAtendimento.filter(d => d.status === "Aguardando").length,
+        Confirmado: dadosAtendimento.filter(d => d.status === "Confirmado").length,
+        Reagendado: dadosAtendimento.filter(d => d.status === "Reagendado").length,
+        Cancelado: dadosAtendimento.filter(d => d.status === "Cancelado").length,
+    };
+
+    // Mapeia os IDs do HTML para os status
+    document.getElementById("contAguardando").innerText = contadores.Aguardando || 0;
+    document.getElementById("contConfirmado").innerText = contadores.Confirmado || 0;
+    document.getElementById("contReagendado").innerText = contadores.Reagendado || 0;
+    document.getElementById("contCancelado").innerText = contadores.Cancelado || 0;
+    
+    // Salva no LocalStorage (opcional)
+    // localStorage.setItem('dadosAtendimento', JSON.stringify(dadosAtendimento));
+}
+
+// ----------------------------------------------------------------------
+// 5. AÇÕES (Seleção, Status, WhatsApp)
+// ----------------------------------------------------------------------
+
+function mudarStatus(id, novoStatus) {
+    const cliente = dadosAtendimento.find(d => d.id == id);
+    if (cliente) {
+        cliente.status = novoStatus;
+        atualizarDashboard();
+    }
+}
+
+function toggleSelecao(id) {
+    const cliente = dadosAtendimento.find(d => d.id == id);
+    if (cliente) {
+        cliente.selecionado = !cliente.selecionado;
+        atualizarDashboard();
+    }
+}
+
+function toggleSelecionarTodosTop(checkbox) {
+    selecionarTodosEstado = checkbox.checked;
+    selecionarTodosToggle();
+}
+
+function selecionarTodosToggle() {
+    selecionarTodosEstado = !selecionarTodosEstado;
+    dadosAtendimento.forEach(d => d.selecionado = selecionarTodosEstado);
+    atualizarDashboard();
+}
+
+/**
+ * Gera a mensagem formatada para um cliente específico.
+ * @param {Object} cliente - O objeto cliente.
+ * @param {string} tipo - O tipo de mensagem (antecipacao, confirmacao, chegada).
+ * @returns {string} - A mensagem formatada.
+ */
+function gerarMensagem(cliente, tipo) {
+    let mensagem = MENSAGENS[tipo] || "";
+    
+    // Substituições de placeholders
+    mensagem = mensagem.replace(/\[NOME\]/g, cliente.cliente.split(' ')[0] || "");
+    mensagem = mensagem.replace(/\[Data Agendamento\]/g, cliente.data || "");
+    mensagem = mensagem.replace(/\[PERIODO\]/g, cliente.periodo || "");
+    mensagem = mensagem.replace(/\[ENDERECO\]/g, cliente.endereco || "");
+    mensagem = mensagem.replace(/\[CONTRATO\]/g, cliente.contrato || "");
+    mensagem = mensagem.replace(/\[BAIRRO\]/g, cliente.bairro || "");
+
+    return encodeURIComponent(mensagem); // Codifica para URL
+}
+
+function gerarPreviewSelecionados() {
+    const tipo = document.getElementById("tipoMensagem").value;
+    const selecionados = dadosAtendimento.filter(d => d.selecionado);
+
+    if (selecionados.length === 0) {
+        alert("Selecione pelo menos um cliente para pré-visualizar.");
+        return;
+    }
+
+    let preview = "";
+    selecionados.forEach((cliente, index) => {
+        const msg = decodeURIComponent(gerarMensagem(cliente, tipo));
+        preview += `--- Cliente ${index + 1} (${cliente.cliente} - ${cliente.contrato}) ---\n${msg}\n\n`;
+    });
+
+    // Exibe em um alerta ou cria um modal/área de preview no HTML
+    alert("Pré-visualização:\n\n" + preview);
+    console.log(preview); // Útil para debug
+}
+
+function enviarWhatsIndividual(id) {
+    const cliente = dadosAtendimento.find(d => d.id == id);
+    if (!cliente) return;
+    
+    const tipo = document.getElementById("tipoMensagem").value;
+    const celularFormatado = cliente.celular.replace(/\D/g, ""); // Remove não-dígitos
+    
+    if (celularFormatado.length < 10) {
+        alert(`Celular inválido para ${cliente.cliente}: ${cliente.celular}`);
+        return;
+    }
+
+    const mensagemCodificada = gerarMensagem(cliente, tipo);
+    const url = `https://web.whatsapp.com/send?phone=55${celularFormatado}&text=${mensagemCodificada}`;
+    window.open(url, '_blank');
 }
 
 
-/**
- * Atualiza os contadores de status na interface HTML.
- */
-function atualizarContadores() {
-    // Calcula a contagem de cada status
-    let aguardando = dados.filter(d => d.status === "Aguardando").length;
-    let confirmados = dados.filter(d => d.status === "Confirmado").length;
-    let cancelados = dados.filter(d => d.status === "Cancelado").length;
-    let reagendados = dados.filter(d => d.status === "Reagendado").length;
+function enviarSelecionadosAbrirWhats() {
+    const selecionados = dadosAtendimento.filter(d => d.selecionado);
 
-    // Função auxiliar para atualizar um contador específico
-    const setCounter = (id, count) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.innerText = count;
-        } else {
-            console.warn(`Aviso: Contador com ID '${id}' não encontrado.`);
-        }
-    };
+    if (selecionados.length === 0) {
+        alert("Selecione pelo menos um cliente para enviar.");
+        return;
+    }
+    
+    alert(`Serão abertas ${selecionados.length} janelas/abas do WhatsApp. Certifique-se de ter o WhatsApp Web aberto.`);
 
-    setCounter("contadorAguardando", aguardando);
-    setCounter("contadorConfirmado", confirmados);
-    setCounter("contadorCancelado", cancelados);
-    setCounter("contadorReagendado", reagendados);
+    selecionados.forEach(cliente => {
+        // Delay opcional para evitar bloqueio de pop-up, embora a navegação já ajude
+        setTimeout(() => {
+            enviarWhatsIndividual(cliente.id);
+        }, 300); // 300ms de intervalo
+    });
 }
