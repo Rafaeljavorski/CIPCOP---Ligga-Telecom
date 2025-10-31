@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("📩 Prévia da mensagem:\n\n" + msg);
   };
 
-  // ✅ Envio ajustado: usa a mesma aba/app do WhatsApp
+  // ✅ Nova versão híbrida: tenta abrir o app e, se bloqueado, copia a mensagem
   window.enviarWhatsApp = function (i) {
     const d = dados[i];
     let phone = d.celular.replace(/\D/g, "");
@@ -165,23 +165,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-   const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
+    const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(mensagem)}`;
 
-try {
-  // Tenta abrir o app diretamente
-  window.location.assign(url);
-  
-  // Se o navegador bloquear o link, oferece opção de copiar
-  setTimeout(() => {
-    if (document.visibilityState !== "hidden") {
+    try {
+      window.location.assign(url);
+      setTimeout(() => {
+        if (document.visibilityState !== "hidden") {
+          navigator.clipboard.writeText(mensagem);
+          alert("⚠️ O navegador bloqueou a abertura direta.\nMensagem copiada — basta colar no WhatsApp já aberto.");
+        }
+      }, 1500);
+    } catch (e) {
       navigator.clipboard.writeText(mensagem);
-      alert("⚠️ O navegador bloqueou a abertura direta.\nMensagem copiada — basta colar no WhatsApp já aberto.");
+      alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — basta colar no app.");
     }
-  }, 1500);
-} catch (e) {
-  navigator.clipboard.writeText(mensagem);
-  alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — basta colar no app.");
-}
 
     alterarStatus(i, "Confirmado");
   };
@@ -204,4 +201,3 @@ try {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
-
