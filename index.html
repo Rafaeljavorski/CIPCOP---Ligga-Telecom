@@ -1,83 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Atendimento COP - Ligga Telecom</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="wrap">
-  <h1>Atendimento COP - Ligga Telecom</h1>
+  <div class="wrap">
+    <h1>Atendimento COP - Ligga Telecom</h1>
 
-  <!-- counters -->
-  <div class="panel row stats">
-    <div class="badge info"><span class="num" id="contAguardando">0</span><span> Aguardando</span></div>
-    <div class="badge ok"><span class="num" id="contConfirmado">0</span><span> Confirmado</span></div>
-    <div class="badge warn"><span class="num" id="contReagendado">0</span><span> Reagendado</span></div>
-    <div class="badge err"><span class="num" id="contCancelado">0</span><span> Cancelado</span></div>
-  </div>
-
-  <!-- controls -->
-  <div class="panel">
-    <div class="row" style="align-items:center">
-      <input id="inputCliente" placeholder="Nome do Cliente" />
-      <input id="inputCelular" placeholder="Celular (somente números)" />
-      <input id="inputContrato" placeholder="Contrato" />
-      <input id="inputData" type="date" />
-      <input id="inputEndereco" placeholder="Endereço" />
-      <input id="inputBairro" placeholder="Bairro" />
-      <button onclick="adicionarCliente()">➕ Adicionar</button>
+    <div class="panel stats">
+      <div class="badge info">Aguardando: <span id="contAguardando">0</span></div>
+      <div class="badge ok">Confirmado: <span id="contConfirmado">0</span></div>
+      <div class="badge warn">Reagendado: <span id="contReagendado">0</span></div>
+      <div class="badge err">Cancelado: <span id="contCancelado">0</span></div>
     </div>
 
-    <div class="row" style="margin-top:8px;align-items:center">
-      <label style="font-size:13px">Modelo:</label>
-      <select id="tipoMensagem" style="margin-left:6px">
-        <option value="antecipacao">Antecipar atendimento</option>
-        <option value="confirmacao">Confirmar agendamento</option>
-        <option value="chegada">Técnico em frente</option>
-      </select>
+    <div class="panel controls">
+      <div class="row">
+        <input id="inputContrato" placeholder="Contrato">
+        <input id="inputCliente" placeholder="Cliente">
+        <input id="inputCelular" placeholder="Celular (somente números)">
+        <input id="inputData" type="date" placeholder="Data Agendamento">
+        <input id="inputEndereco" placeholder="Endereço">
+        <input id="inputBairro" placeholder="Bairro">
+        <button id="btnAdd">➕ Adicionar</button>
+      </div>
 
-      <button class="ghost small-btn" onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
-      <input id="arquivoCSV" type="file" accept=".csv" style="display:none" onchange="importarCSV(event)" />
+      <div class="row" style="margin-top:8px;align-items:center">
+        <label>Modelo:</label>
+        <select id="tipoMensagem">
+          <option value="antecipacao">Antecipar atendimento</option>
+          <option value="confirmacao">Confirmar agendamento</option>
+          <option value="chegada">Técnico em frente</option>
+        </select>
 
-      <input id="filtroContrato" placeholder="Buscar por contrato ou cliente" style="margin-left:8px;" oninput="filtrarTabela()" />
+        <input id="fileInput" type="file" accept=".csv" />
+        <input id="filtro" placeholder="Buscar contrato/cliente" />
+        <button id="btnSelectAll">Selecionar Todos</button>
+        <button id="btnPreviewSel">Pré-visualizar Selecionados</button>
+        <button id="btnSendSel">Enviar Selecionados</button>
+        <button id="btnExport">Exportar CSV</button>
+      </div>
 
-      <button class="small-btn" onclick="selecionarTodosToggle()">☑️ Selecionar Todos</button>
-      <button class="small-btn" onclick="gerarPreviewSelecionados()">📝 Pré-visualizar Selecionados</button>
-      <button class="small-btn" onclick="enviarSelecionadosAbrirWhats()">📲 Enviar Selecionados</button>
-      <button class="small-btn" onclick="exportarCSV()">📊 Exportar</button>
-      <button class="small-btn" onclick="limparSelecionados()">🗑️ Excluir Selecionados</button>
-      <button class="ghost small-btn" onclick="limparTodos()">🧹 Limpar Tudo</button>
+      <div class="note">CSV esperado (ex): Contrato,Cliente,Celular,Data Agendamento,Endereço,Bairro</div>
     </div>
 
-    <div style="margin-top:10px">
-      <div class="note">Mensagens fixas (padrões) — você pode editar a mensagem por linha antes de enviar. Placeholders: <strong>[NOME]</strong>, <strong>[Data Agendamento]</strong>, <strong>[PERIODO]</strong>, <strong>[ENDERECO]</strong>, <strong>[CONTRATO]</strong>, <strong>[BAIRRO]</strong></div>
+    <div class="panel table-wrap">
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th><input id="selTop" type="checkbox"></th>
+            <th>Contrato</th>
+            <th>Cliente</th>
+            <th>Celular</th>
+            <th>Data</th>
+            <th>Período</th>
+            <th>Endereço</th>
+            <th>Bairro</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaBody"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- table -->
-  <div class="panel" style="overflow:auto">
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th class="sel-col checkbox-center"><input id="selTodosTop" type="checkbox" onchange="toggleSelecionarTodosTop(this)"></th>
-          <th>Contrato</th>
-          <th>Cliente</th>
-          <th>Celular</th>
-          <th>Data</th>
-          <th>Período</th>
-          <th>Endereço</th>
-          <th>Bairro</th>
-          <th>Status</th>
-          <th style="min-width:260px">Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
