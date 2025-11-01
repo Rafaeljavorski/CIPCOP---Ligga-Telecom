@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Atendimento COP - Ligga Telecom</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Atendimento COP - Ligga Telecom</h1>
@@ -17,8 +18,8 @@
   </div>
 
   <div class="painel">
-    <input type="file" id="fileInput" accept=".csv">
-    <input type="text" id="filtroContrato" placeholder="Buscar contrato...">
+    <input type="file" id="fileInput" accept=".csv" />
+    <input type="text" id="filtroContrato" placeholder="Buscar contrato..." />
     <button id="btnExportar">Exportar CSV</button>
     <button id="btnLimparSelecionados">🧹 Limpar Selecionados</button>
     <button id="btnEnviarSelecionados">📤 Enviar Selecionados</button>
@@ -65,7 +66,7 @@
           celular: cabecalho.indexOf("Celular"),
           data: cabecalho.indexOf("Data Agendamento"),
           endereco: cabecalho.indexOf("Endereço"),
-          bairro: cabecalho.indexOf("Bairro")
+          bairro: cabecalho.indexOf("Bairro"),
         };
 
         dados = linhas.slice(1).map(l => {
@@ -79,7 +80,7 @@
             bairro: cols[indices.bairro] || "",
             periodo: "Tarde",
             status: "Aguardando",
-            selecionado: false
+            selecionado: false,
           };
         }).filter(d => d.contrato && d.celular);
 
@@ -115,7 +116,7 @@
           <td>${d.status}</td>
           <td>
             <button onclick="previewMensagem(${i})">👁 Prévia</button>
-            <button onclick="enviarPara(${i})">📤 Enviar</button>
+            <button onclick="enviarMensagem(${i})">📤 Enviar</button>
             <button onclick="alterarStatus(${i}, 'Confirmado')">✅</button>
             <button onclick="alterarStatus(${i}, 'Reagendado')">📅</button>
             <button onclick="alterarStatus(${i}, 'Cancelado')">❌</button>
@@ -126,15 +127,10 @@
     }
 
     function atualizarContadores() {
-      const aguardando = dados.filter(d => d.status === "Aguardando").length;
-      const confirmado = dados.filter(d => d.status === "Confirmado").length;
-      const reagendado = dados.filter(d => d.status === "Reagendado").length;
-      const cancelado = dados.filter(d => d.status === "Cancelado").length;
-
-      document.getElementById("contadorAguardando").innerText = aguardando;
-      document.getElementById("contadorConfirmado").innerText = confirmado;
-      document.getElementById("contadorReagendado").innerText = reagendado;
-      document.getElementById("contadorCancelado").innerText = cancelado;
+      document.getElementById("contadorAguardando").innerText = dados.filter(d => d.status === "Aguardando").length;
+      document.getElementById("contadorConfirmado").innerText = dados.filter(d => d.status === "Confirmado").length;
+      document.getElementById("contadorReagendado").innerText = dados.filter(d => d.status === "Reagendado").length;
+      document.getElementById("contadorCancelado").innerText = dados.filter(d => d.status === "Cancelado").length;
     }
 
     function toggleSelecionado(i) {
@@ -179,13 +175,15 @@
       }
     }
 
-    // ✅ Corrigido — usa wa.me com fallback para garantir texto
-    function enviarPara(i) {
+    // ✅ Correção final — abre o app WhatsApp com mensagem pronta
+    function enviarMensagem(i) {
       const d = dados[i];
-      const msg = gerarMensagem(d, "2");
+      const tipo = prompt("Escolha o tipo de mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico no local", "1");
+      const msg = gerarMensagem(d, tipo);
       const numero = d.celular.replace(/\D/g, "");
-      const link = `https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`;
+      if (!numero) return alert("Número de celular inválido!");
 
+      const link = `https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`;
       try {
         const a = document.createElement("a");
         a.href = link;
@@ -199,12 +197,12 @@
         setTimeout(() => {
           if (document.visibilityState !== "hidden") {
             navigator.clipboard.writeText(msg);
-            alert("⚠️ O WhatsApp abriu sem texto.\nA mensagem foi copiada — basta colar no campo de envio.");
+            alert("⚠️ O WhatsApp abriu, mas sem o texto.\nA mensagem foi copiada — basta colar no campo de envio.");
           }
         }, 1500);
       } catch (e) {
         navigator.clipboard.writeText(msg);
-        alert("⚠️ Não foi possível abrir o WhatsApp.\nMensagem copiada — cole manualmente no app.");
+        alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — cole manualmente no app.");
       }
 
       alterarStatus(i, "Confirmado");
@@ -213,12 +211,10 @@
     function enviarSelecionados() {
       const selecionados = dados.filter(d => d.selecionado);
       if (selecionados.length === 0) return alert("Nenhum contrato selecionado.");
-
       selecionados.forEach(d => {
         const msg = gerarMensagem(d, "2");
         const numero = d.celular.replace(/\D/g, "");
         const link = `https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`;
-
         const a = document.createElement("a");
         a.href = link;
         a.target = "_blank";
@@ -239,7 +235,7 @@
     function exportarCSV() {
       const linhas = [
         ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro", "Período", "Status"],
-        ...dados.map(d => [d.contrato, d.cliente, d.celular, d.data, d.endereco, d.bairro, d.periodo, d.status])
+        ...dados.map(d => [d.contrato, d.cliente, d.celular, d.data, d.endereco, d.bairro, d.periodo, d.status]),
       ];
       const csv = linhas.map(l => l.join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
