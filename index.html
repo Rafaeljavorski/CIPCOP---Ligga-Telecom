@@ -1,251 +1,247 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atendimento COP - Ligga Telecom</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atendimento COT - Ligga Telecom</title>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+body { font-family: Arial; background:#f9fafb; margin:20px; color:#333; }
+h1{text-align:center;color:#2563eb;}
+.input-area, table{width:100%; max-width:1200px; margin:20px auto;}
+input, select, button, textarea{padding:6px;margin:4px;border:1px solid #ccc;border-radius:6px;}
+button{cursor:pointer;background-color:#2563eb;color:white;border:none;}
+button:hover{background-color:#1e40af;}
+table{border-collapse:collapse;width:100%;background:white;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:6px;text-align:center;}
+th{background-color:#2563eb;color:white;}
+tr:nth-child(even){background-color:#f2f2f2;}
+.top-buttons{text-align:center;margin-bottom:20px;}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:600px;margin:0 auto 20px;}
+.card{flex:1;min-width:120px;background:white;border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.confirmado {border-top:4px solid #22c55e;}
+.reagendado {border-top:4px solid #facc15;}
+.cancelado {border-top:4px solid #ef4444;}
+.aguardando {border-top:4px solid #3b82f6;}
+textarea{width:100%; min-height:60px;}
+</style>
 </head>
 <body>
-  <h1>Atendimento COP - Ligga Telecom</h1>
 
-  <div id="contadores">
-    <div class="contador aguardando">🕓 Aguardando: <strong id="contadorAguardando">0</strong></div>
-    <div class="contador confirmado">✅ Confirmado: <strong id="contadorConfirmado">0</strong></div>
-    <div class="contador reagendado">📅 Reagendado: <strong id="contadorReagendado">0</strong></div>
-    <div class="contador cancelado">❌ Cancelado: <strong id="contadorCancelado">0</strong></div>
+<h1>Atendimento COT - Ligga Telecom</h1>
+
+<div class="stats">
+  <div class="card aguardando"><strong>Aguardando</strong><p id="contAguardando">0</p></div>
+  <div class="card confirmado"><strong>Confirmados</strong><p id="contConfirmado">0</p></div>
+  <div class="card reagendado"><strong>Reagendados</strong><p id="contReagendado">0</p></div>
+  <div class="card cancelado"><strong>Cancelados</strong><p id="contCancelado">0</p></div>
+</div>
+
+<div class="input-area">
+  <input id="cliente" placeholder="Nome do cliente">
+  <input id="celular" placeholder="Celular (somente números)">
+  <input id="contrato" placeholder="Número do Contrato">
+  <input id="data" type="date">
+  <select id="periodo">
+    <option value="">Período</option>
+    <option>Manhã</option>
+    <option>Tarde</option>
+    <option>Noite</option>
+  </select>
+  <input id="endereco" placeholder="Endereço do cliente">
+  <input id="bairro" placeholder="Bairro">
+  <button onclick="adicionarCliente()">Adicionar</button>
+
+  <select id="tipoMensagem" onchange="atualizarMensagemPadrao()">
+    <option value="antecipacao">Mensagem de Antecipação</option>
+    <option value="confirmacao">Mensagem de Confirmação</option>
+    <option value="chegada">Aviso Chegada Técnico</option>
+  </select>
+
+  <textarea id="mensagemPadrao" placeholder="Mensagem para envio"></textarea>
+  
+  <div class="top-buttons">
+    <button onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
+    <input type="file" id="arquivoCSV" accept=".csv" style="display:none" onchange="importarCSV(event)">
+    <button onclick="exportarCSV()">📊 Exportar Relatório (Sem Duplicados)</button>
   </div>
+</div>
 
-  <div class="painel">
-    <input type="file" id="fileInput" accept=".csv" />
-    <input type="text" id="filtroContrato" placeholder="Buscar contrato..." />
-    <button id="btnExportar">Exportar CSV</button>
-    <button id="btnLimparSelecionados">🧹 Limpar Selecionados</button>
-    <button id="btnEnviarSelecionados">📤 Enviar Selecionados</button>
-  </div>
+<table id="tabela">
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Celular</th>
+      <th>Contrato</th>
+      <th>Data</th>
+      <th>Período</th>
+      <th>Endereço</th>
+      <th>Bairro</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th>Selecionar</th>
-        <th>Contrato</th>
-        <th>Cliente</th>
-        <th>Celular</th>
-        <th>Data Agendamento</th>
-        <th>Endereço</th>
-        <th>Bairro</th>
-        <th>Período</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabelaBody"></tbody>
-  </table>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+let clientes = [];
 
-  <script>
-    let dados = [];
+function salvarLocal() { localStorage.setItem('clientes', JSON.stringify(clientes)); }
+function carregarLocal() { const data = localStorage.getItem('clientes'); if(data){ clientes = JSON.parse(data); atualizarTabela(); } }
+window.onload = () => { carregarLocal(); atualizarMensagemPadrao(); };
 
-    document.getElementById("fileInput").addEventListener("change", handleFileUpload);
-    document.getElementById("filtroContrato").addEventListener("input", filtrarTabela);
-    document.getElementById("btnExportar").addEventListener("click", exportarCSV);
-    document.getElementById("btnLimparSelecionados").addEventListener("click", limparSelecionados);
-    document.getElementById("btnEnviarSelecionados").addEventListener("click", enviarSelecionados);
+function adicionarCliente() {
+  const nome = document.getElementById('cliente').value;
+  const celular = document.getElementById('celular').value;
+  const contrato = document.getElementById('contrato').value;
+  const data = document.getElementById('data').value;
+  const periodo = document.getElementById('periodo').value;
+  const endereco = document.getElementById('endereco').value;
+  const bairro = document.getElementById('bairro').value;
+  if (!nome || !celular || !contrato || !data || !periodo || !endereco || !bairro) { alert("Preencha todos os campos!"); return; }
+  clientes.push({ nome, celular, contrato, data, periodo, endereco, bairro, status:"Aguardando" });
+  atualizarTabela(); limparCampos(); salvarLocal();
+}
+function limparCampos(){
+  document.getElementById('cliente').value = "";
+  document.getElementById('celular').value = "";
+  document.getElementById('contrato').value = "";
+  document.getElementById('data').value = "";
+  document.getElementById('periodo').value = "";
+  document.getElementById('endereco').value = "";
+  document.getElementById('bairro').value = "";
+}
 
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return alert("Nenhum arquivo selecionado.");
+// --- Mensagens dinâmicas ---
+function gerarMensagem(c){
+  const tipo = document.getElementById('tipoMensagem').value;
+  if(tipo==="antecipacao"){
+    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento para hoje!\n\n📅 Data: ${c.data}\n⏰ Período: ${c.periodo}\n\nVocê confirma a antecipação do seu atendimento? ✅\n1. SIM, CONFIRMAR\n2. NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não suporta chamadas ou áudios)`;
+  } else if(tipo==="confirmacao"){
+    return `Olá, tudo bem?\n\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${c.data}\n\nPor favor, selecione uma das opções abaixo para que possamos dar andamento:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nObs.: Nosso sistema não aceita áudios ou chamadas telefônicas.\n\nAguardamos sua resposta!\nEquipe Ligga Telecom\n\nUm técnico a serviço da Ligga Telecom está a caminho da sua residência para realizar a visita técnica.\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️`;
+  } else if(tipo==="chegada"){
+    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Informamos que nosso técnico está em frente ao seu endereço para realizar a visita técnica. 🚀\n\n⚠️ Por favor, certifique-se que haja alguém maior de 18 anos no local durante o atendimento. ⚠️\n\nAgradecemos a sua atenção!\nEquipe Ligga Telecom`;
+  }
+}
 
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const linhas = e.target.result.split("\n").map(l => l.trim()).filter(l => l);
-        const cabecalho = linhas[0].split(",");
-        const indices = {
-          contrato: cabecalho.indexOf("Contrato"),
-          cliente: cabecalho.indexOf("Cliente"),
-          celular: cabecalho.indexOf("Celular"),
-          data: cabecalho.indexOf("Data Agendamento"),
-          endereco: cabecalho.indexOf("Endereço"),
-          bairro: cabecalho.indexOf("Bairro"),
-        };
+function atualizarMensagemPadrao(){
+  const c = {nome:"Cliente",data:"dd/mm/aaaa",periodo:"Período"};
+  document.getElementById('mensagemPadrao').value = gerarMensagem(c);
+}
 
-        dados = linhas.slice(1).map(l => {
-          const cols = l.split(",");
-          return {
-            contrato: cols[indices.contrato] || "",
-            cliente: cols[indices.cliente] || "",
-            celular: cols[indices.celular] || "",
-            data: cols[indices.data] || "",
-            endereco: cols[indices.endereco] || "",
-            bairro: cols[indices.bairro] || "",
-            periodo: "Tarde",
-            status: "Aguardando",
-            selecionado: false,
-          };
-        }).filter(d => d.contrato && d.celular);
+// --- Atualizar tabela ---
+function atualizarTabela() {
+  const tbody = document.querySelector("#tabela tbody");
+  tbody.innerHTML = "";
+  clientes.forEach((c,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.nome}</td>
+      <td contenteditable="true" onblur="alterarNumero(${i},this.innerText)">${c.celular}</td>
+      <td contenteditable="true" onblur="alterarContrato(${i},this.innerText)">${c.contrato}</td>
+      <td>${c.data}</td>
+      <td>${c.periodo}</td>
+      <td contenteditable="true" onblur="alterarEndereco(${i},this.innerText)">${c.endereco}</td>
+      <td contenteditable="true" onblur="alterarBairro(${i},this.innerText)">${c.bairro}</td>
+      <td>${c.status}</td>
+      <td>
+        <button onclick="enviarMensagem(${i})">📤 Enviar Mensagem</button>
+        <button onclick="atualizarStatus(${i},'Confirmado')">✅ Confirmar</button>
+        <button onclick="atualizarStatus(${i},'Reagendado')">📅 Reagendar</button>
+        <button onclick="atualizarStatus(${i},'Cancelado')">❌ Cancelar</button>
+        <button onclick="excluirContato(${i})">🗑️ Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  atualizarContadores(); salvarLocal();
+}
 
-        atualizarTabela();
-        atualizarContadores();
-        alert("✅ Planilha importada com sucesso!");
-      };
+// --- Funções de edição ---
+function alterarNumero(i, numero){ clientes[i].celular = numero; salvarLocal(); }
+function alterarContrato(i, valor){ clientes[i].contrato = valor; salvarLocal(); }
+function alterarEndereco(i,endereco){ clientes[i].endereco=endereco; salvarLocal(); }
+function alterarBairro(i, bairro){ clientes[i].bairro = bairro; salvarLocal(); }
+function atualizarStatus(i,status){ clientes[i].status=status; atualizarTabela(); salvarLocal(); }
+function excluirContato(i){ if(confirm("Deseja realmente excluir este contato?")){ clientes.splice(i,1); atualizarTabela(); salvarLocal(); } }
 
-      reader.readAsText(file, "UTF-8");
-    }
+// --- Contadores ---
+function atualizarContadores(){
+  const cont={aguardando:0,confirmado:0,reagendado:0,cancelado:0};
+  clientes.forEach(c=>{
+    if(c.status.includes("Aguardando") || c.status=="Mensagem enviada") cont.aguardando++;
+    else if(c.status=="Confirmado") cont.confirmado++;
+    else if(c.status=="Reagendado") cont.reagendado++;
+    else if(c.status=="Cancelado") cont.cancelado++;
+  });
+  document.getElementById("contAguardando").innerText=cont.aguardando;
+  document.getElementById("contConfirmado").innerText=cont.confirmado;
+  document.getElementById("contReagendado").innerText=cont.reagendado;
+  document.getElementById("contCancelado").innerText=cont.cancelado;
+}
 
-    function atualizarTabela() {
-      const body = document.getElementById("tabelaBody");
-      body.innerHTML = "";
+// --- Envio individual ---
+function enviarMensagem(i){
+  const c = clientes[i];
+  const numero = c.celular;
+  const msg = c.mensagem || gerarMensagem(c);
+  window.open(`https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`, "_blank");
+  c.status = "Mensagem enviada";
+  atualizarTabela(); salvarLocal();
+}
 
-      dados.forEach((d, i) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><input type="checkbox" ${d.selecionado ? "checked" : ""} onchange="toggleSelecionado(${i})"></td>
-          <td>${d.contrato}</td>
-          <td>${d.cliente}</td>
-          <td>${d.celular}</td>
-          <td>${d.data}</td>
-          <td>${d.endereco}</td>
-          <td>${d.bairro}</td>
-          <td>
-            <select id="periodo_${i}" onchange="alterarPeriodo(${i}, this.value)">
-              <option ${d.periodo === "Manhã" ? "selected" : ""}>Manhã</option>
-              <option ${d.periodo === "Tarde" ? "selected" : ""}>Tarde</option>
-              <option ${d.periodo === "Noite" ? "selected" : ""}>Noite</option>
-            </select>
-          </td>
-          <td>${d.status}</td>
-          <td>
-            <button onclick="previewMensagem(${i})">👁 Prévia</button>
-            <button onclick="enviarMensagem(${i})">📤 Enviar</button>
-            <button onclick="alterarStatus(${i}, 'Confirmado')">✅</button>
-            <button onclick="alterarStatus(${i}, 'Reagendado')">📅</button>
-            <button onclick="alterarStatus(${i}, 'Cancelado')">❌</button>
-          </td>
-        `;
-        body.appendChild(row);
-      });
-    }
+// --- CSV ---
+function exportarCSV(){
+  // Filtra duplicados pelo número do contrato
+  const clientesUnicos = clientes.filter((c, index, self) =>
+    index === self.findIndex(t => t.contrato === c.contrato)
+  );
 
-    function atualizarContadores() {
-      document.getElementById("contadorAguardando").innerText = dados.filter(d => d.status === "Aguardando").length;
-      document.getElementById("contadorConfirmado").innerText = dados.filter(d => d.status === "Confirmado").length;
-      document.getElementById("contadorReagendado").innerText = dados.filter(d => d.status === "Reagendado").length;
-      document.getElementById("contadorCancelado").innerText = dados.filter(d => d.status === "Cancelado").length;
-    }
+  let csv = "Cliente,Celular,Contrato,Data,Período,Endereço,Bairro,Status\n";
+  clientesUnicos.forEach(c => {
+    const linha = [
+      `"${c.nome}"`,
+      `"${c.celular}"`,
+      `"${c.contrato}"`,
+      `"${c.data}"`,
+      `"${c.periodo}"`,
+      `"${c.endereco}"`,
+      `"${c.bairro}"`,
+      `"${c.status}"`
+    ].join(",");
+    csv += linha + "\n";
+  });
 
-    function toggleSelecionado(i) {
-      dados[i].selecionado = !dados[i].selecionado;
-    }
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.setAttribute("href", URL.createObjectURL(blob));
+  link.setAttribute("download", "relatorio_visitas.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
-    function alterarPeriodo(i, valor) {
-      dados[i].periodo = valor;
-    }
-
-    function alterarStatus(i, status) {
-      dados[i].status = status;
-      atualizarTabela();
-      atualizarContadores();
-    }
-
-    function filtrarTabela() {
-      const filtro = document.getElementById("filtroContrato").value.toLowerCase();
-      const linhas = document.querySelectorAll("#tabelaBody tr");
-      linhas.forEach(l => {
-        const contrato = l.children[1].innerText.toLowerCase();
-        l.style.display = contrato.includes(filtro) ? "" : "none";
-      });
-    }
-
-    function previewMensagem(i) {
-      const d = dados[i];
-      const tipo = prompt("Escolha o tipo de mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico no local", "1");
-      alert("📩 Prévia:\n\n" + gerarMensagem(d, tipo));
-    }
-
-    function gerarMensagem(d, tipo) {
-      switch (tipo) {
-        case "1":
-          return `Olá, Prezado(a) Cliente Ligga!\nAqui é do agendamento da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a oportunidade de antecipar o seu atendimento para hoje!\n\n📅 Data: ${d.data}\n⏰ Período: ${d.periodo}\n\nPodemos confirmar a antecipação?\n1️⃣ Confirmar\n2️⃣ Permanecer data atual\n(Nosso sistema não suporta chamadas e áudios)`;
-        case "2":
-          return `Olá, tudo bem?\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${d.data}\n\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nAguardamos sua resposta!\nEquipe Ligga Telecom.`;
-        case "3":
-          return `Um técnico a serviço da Ligga Telecom está em frente à sua residência para realizar a visita técnica.\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️`;
-        default:
-          return "";
+// --- Importar CSV ---
+function importarCSV(event){
+  const file=event.target.files[0]; if(!file) return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:function(results){
+    results.data.forEach(row=>{
+      if(row.Nome && row.Celular){
+        clientes.push({
+          nome: row.Nome || row.nome || "",
+          celular: row.Celular || row.celular || "",
+          contrato: row.Contrato || row.contrato || "",
+          data: row.Data || row.data || "",
+          periodo: row.Periodo || row.periodo || "",
+          endereco: row.Endereco || row.endereco || "",
+          bairro: row.Bairro || row.bairro || "",
+          status: "Importado"
+        });
       }
-    }
-
-    // ✅ Correção final — abre o app WhatsApp com mensagem pronta
-    function enviarMensagem(i) {
-      const d = dados[i];
-      const tipo = prompt("Escolha o tipo de mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico no local", "1");
-      const msg = gerarMensagem(d, tipo);
-      const numero = d.celular.replace(/\D/g, "");
-      if (!numero) return alert("Número de celular inválido!");
-
-      const link = `https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`;
-      try {
-        const a = document.createElement("a");
-        a.href = link;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        setTimeout(() => {
-          if (document.visibilityState !== "hidden") {
-            navigator.clipboard.writeText(msg);
-            alert("⚠️ O WhatsApp abriu, mas sem o texto.\nA mensagem foi copiada — basta colar no campo de envio.");
-          }
-        }, 1500);
-      } catch (e) {
-        navigator.clipboard.writeText(msg);
-        alert("⚠️ Não foi possível abrir o WhatsApp automaticamente.\nMensagem copiada — cole manualmente no app.");
-      }
-
-      alterarStatus(i, "Confirmado");
-    }
-
-    function enviarSelecionados() {
-      const selecionados = dados.filter(d => d.selecionado);
-      if (selecionados.length === 0) return alert("Nenhum contrato selecionado.");
-      selecionados.forEach(d => {
-        const msg = gerarMensagem(d, "2");
-        const numero = d.celular.replace(/\D/g, "");
-        const link = `https://wa.me/55${numero}?text=${encodeURIComponent(msg)}`;
-        const a = document.createElement("a");
-        a.href = link;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      });
-    }
-
-    function limparSelecionados() {
-      dados = dados.filter(d => !d.selecionado);
-      atualizarTabela();
-      atualizarContadores();
-    }
-
-    function exportarCSV() {
-      const linhas = [
-        ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro", "Período", "Status"],
-        ...dados.map(d => [d.contrato, d.cliente, d.celular, d.data, d.endereco, d.bairro, d.periodo, d.status]),
-      ];
-      const csv = linhas.map(l => l.join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "atendimento_cop_ligga.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  </script>
+    }); atualizarTabela(); salvarLocal();
+  }});
+}
+</script>
 </body>
 </html>
