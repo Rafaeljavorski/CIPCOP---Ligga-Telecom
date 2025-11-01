@@ -36,7 +36,9 @@ textarea{width:100%; min-height:60px;}
   <div class="card reagendado"><strong>Reagendados</strong><p id="contReagendado">0</p></div>
   <div class="card cancelado"><strong>Cancelados</strong><p id="contCancelado">0</p></div>
 </div>
-
+  <div style="text-align:center; margin-top:10px;">
+  <input id="filtroContrato" placeholder="🔍 Buscar por contrato..." oninput="filtrarPorContrato()">
+</div>
 <div class="input-area">
   <input id="cliente" placeholder="Nome do cliente">
   <input id="celular" placeholder="Celular (somente números)">
