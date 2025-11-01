@@ -45,26 +45,30 @@ document.addEventListener("DOMContentLoaded", () => {
     corpoTabela = tabela;
   }
 
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return alert("Nenhum arquivo selecionado!");
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const text = e.target.result;
-      const separador = text.includes(";") ? ";" : ",";
-      const linhas = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-      const cabecalho = linhas[0].split(separador).map(c => c.trim());
-      const linhasDados = linhas.slice(1);
-
-      const camposEsperados = ["Contrato", "Cliente", "Celular", "Data Agendamento", "Endereço", "Bairro"];
-      const indices = camposEsperados.map(campo => cabecalho.indexOf(campo));
-
-      if (indices.includes(-1)) {
-        alert("⚠️ Colunas inválidas! Esperado: " + camposEsperados.join(", "));
-        return;
-      }
-
+// --- Importar CSV ---
+function importarCSV(event){
+  const file=event.target.files[0]; if(!file) return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:function(results){
+    results.data.forEach(row=>{
+      if(row.Nome && row.Celular){
+        clientes.push({
+          nome: row.Nome || row.nome || "",
+          celular: row.Celular || row.celular || "",
+          contrato: row.Contrato || row.contrato || "",
+          data: row.Data || row.data || "",
+          // --- CORREÇÃO AQUI ---
+          // Agora ele procura por "Periodo", "periodo", "Período" ou "período"
+          periodo: row.Periodo || row.periodo || row.Período || row.período || "", 
+          // E também por "Endereco", "endereco", "Endereço" ou "endereço"
+          endereco: row.Endereco || row.endereco || row.Endereço || row.endereço || "", 
+          // --- FIM DA CORREÇÃO ---
+          bairro: row.Bairro || row.bairro || "",
+          status: "Importado"
+        });
+      }
+    }); atualizarTabela(); salvarLocal();
+  }});
+}
       dados = linhasDados.map(linha => {
         const cols = linha.split(separador);
         return {
@@ -202,5 +206,6 @@ function enviarMensagem(i){
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
+
 
 
