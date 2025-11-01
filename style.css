@@ -1,0 +1,19 @@
+body { font-family: Arial; background:#f9fafb; margin:20px; color:#333; }
+h1{text-align:center;color:#2563eb;}
+.input-area, table{width:100%; max-width:1200px; margin:20px auto;}
+input, select, button, textarea{padding:6px;margin:4px;border:1px solid #ccc;border-radius:6px;}
+button{cursor:pointer;background-color:#2563eb;color:white;border:none;}
+button:hover{background-color:#1e40af;}
+table{border-collapse:collapse;width:100%;background:white;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:6px;text-align:center;}
+th{background-color:#2563eb;color:white;}
+tr:nth-child(even){background-color:#f2f2f2;}
+.top-buttons{text-align:center;margin-bottom:20px;}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:600px;margin:0 auto 20px;}
+.card{flex:1;min-width:120px;background:white;border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.confirmado {border-top:4px solid #22c55e;}
+.reagendado {border-top:4px solid #facc15;}
+.cancelado {border-top:4px solid #ef4444;}
+.aguardando {border-top:4px solid #3b82f6;}
+textarea{width:100%; min-height:60px;}
+table th:first-child, table td:first-child { width: 40px; }
