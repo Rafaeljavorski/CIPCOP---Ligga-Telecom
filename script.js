@@ -184,6 +184,8 @@ async function enviarSelecionados(){
   }
 }
 
+}
+
 // excluir selecionados
 function excluirSelecionados(){
   if(!confirm("Deseja excluir todos os contatos selecionados?")) return;
