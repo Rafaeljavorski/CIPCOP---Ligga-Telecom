@@ -141,14 +141,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     alert("📩 Prévia da mensagem:\n\n" + msg);
   };
-
-  // ✅ Nova versão híbrida: tenta abrir o app e, se bloqueado, copia a mensagem
-  window.enviarWhatsApp = function (i) {
-    const d = dados[i];
-    let phone = d.celular.replace(/\D/g, "");
-    if (!phone.startsWith("55")) phone = "55" + phone;
-    const tipo = prompt("Escolha a mensagem:\n1 - Antecipação\n2 - Confirmação\n3 - Técnico em frente", "1");
-    let mensagem = "";
+// --- Envio individual ---
+function enviarMensagem(i){
+  const c = clientes[i];
+  const numero = c.celular;
+  const msg = c.mensagem || gerarMensagem(c);
+  window.open(`https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`, "whatsapp_sender"); // <-- ALTERADO
+  c.status = "Mensagem enviada";
+  atualizarTabela(); salvarLocal();
 
     switch (tipo) {
       case "1":
@@ -202,4 +202,5 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("contadorCancelado").innerText = cancelados;
   }
 });
+
 
