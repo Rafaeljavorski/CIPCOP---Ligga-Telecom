@@ -90,7 +90,6 @@ function enviarMensagem(i) {
   atualizarTabela();
   salvarLocal();
   }
-}
 
 
 function exportarCSV(){
