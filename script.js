@@ -6,12 +6,12 @@ function carregarLocal() { const data = localStorage.getItem('clientes'); if(dat
 window.onload = () => { carregarLocal(); atualizarMensagemPadrao(); };
 
 function adicionarCliente() {
-  const nome = cliente.value.trim();
-  const celular = celularInput.value.trim();
-  const contrato = contratoInput.value.trim();
+  const nome = document.getElementById('cliente').value.trim();
+  const celular = document.getElementById('celular').value.trim();
+  const contrato = document.getElementById('contrato').value.trim();
   const data = document.getElementById('data').value;
   const periodo = document.getElementById('periodo').value;
-  const endereco = document.getElementById('endereco').value;
+  const endereco = document.getElementById('endereco').value.trim();
   if (!nome || !celular || !contrato || !data || !periodo || !endereco) return alert("Preencha todos os campos!");
   clientes.push({ nome, celular, contrato, data, periodo, endereco, status:"Aguardando" });
   atualizarTabela(); salvarLocal();
@@ -60,14 +60,25 @@ function atualizarTabela() {
 
 function atualizarStatus(i, status){ clientes[i].status=status; atualizarTabela(); salvarLocal(); }
 
+// ✅ CORREÇÃO: Mantém apenas uma aba do WhatsApp aberta e reusa nas próximas mensagens
 function enviarMensagem(i){
   const c = clientes[i];
-  const numero = c.celular.replace(/\D/g,"");
+  const numero = c.celular.replace(/\D/g, "");
   const msg = gerarMensagem(c);
   const url = `https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
-  abaWhatsApp = window.open(url, "whatsappWindow"); // reusa a mesma aba
+
+  // Se a aba do WhatsApp já estiver aberta e válida, reutiliza
+  if (abaWhatsApp && !abaWhatsApp.closed) {
+    abaWhatsApp.location.href = url;
+    abaWhatsApp.focus();
+  } else {
+    // Abre uma nova aba apenas na primeira vez
+    abaWhatsApp = window.open(url, "whatsappWindow");
+  }
+
   clientes[i].status = "Mensagem enviada";
-  atualizarTabela(); salvarLocal();
+  atualizarTabela();
+  salvarLocal();
 }
 
 function exportarCSV(){
