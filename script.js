@@ -147,7 +147,7 @@ function enviarMensagem(i) {
   if (abaWhatsApp && !abaWhatsApp.closed) {
     abaWhatsApp.location.href = url;
   } else {
-    abaWhatsApp = window.open(url, "whatsLigga");
+    abaWhatsApp = window.open(url, "whatsappWindow");
   }
 
   c.status = "Mensagem enviada";
