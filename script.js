@@ -89,6 +89,7 @@ function enviarMensagem(i) {
   clientes[i].status = "Mensagem enviada";
   atualizarTabela();
   salvarLocal();
+  }
 }
 
 
