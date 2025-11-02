@@ -61,25 +61,36 @@ function atualizarTabela() {
 function atualizarStatus(i, status){ clientes[i].status=status; atualizarTabela(); salvarLocal(); }
 
 // ✅ CORREÇÃO: Mantém apenas uma aba do WhatsApp aberta e reusa nas próximas mensagens
-function enviarMensagem(i){
+let abaWhatsApp = null;
+
+function abrirAbaWhatsApp() {
+  // Abre uma aba fixa do WhatsApp Web uma única vez
+  if (!abaWhatsApp || abaWhatsApp.closed) {
+    abaWhatsApp = window.open("https://web.whatsapp.com", "whatsappWindow");
+    alert("Aba do WhatsApp aberta. Agora envie mensagens normalmente.");
+  } else {
+    abaWhatsApp.focus();
+  }
+}
+
+function enviarMensagem(i) {
   const c = clientes[i];
   const numero = c.celular.replace(/\D/g, "");
   const msg = gerarMensagem(c);
-  const url = `https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
+  const link = `https://web.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(msg)}`;
 
-  // Se a aba do WhatsApp já estiver aberta e válida, reutiliza
   if (abaWhatsApp && !abaWhatsApp.closed) {
-    abaWhatsApp.location.href = url;
+    abaWhatsApp.location.href = link; // envia pra mesma aba
     abaWhatsApp.focus();
   } else {
-    // Abre uma nova aba apenas na primeira vez
-    abaWhatsApp = window.open(url, "whatsappWindow");
+    alert("Abra primeiro o WhatsApp Web clicando em '🟢 Abrir WhatsApp Web'.");
   }
 
   clientes[i].status = "Mensagem enviada";
   atualizarTabela();
   salvarLocal();
 }
+
 
 function exportarCSV(){
   const clientesUnicos = clientes.filter((c, index, self) => index === self.findIndex(t => t.contrato === c.contrato));
