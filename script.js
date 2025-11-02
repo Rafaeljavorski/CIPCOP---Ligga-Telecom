@@ -61,7 +61,7 @@ function gerarMensagem(c) {
   } else if (tipo === "confirmacao") {
     return `Olá, ${c.nome}! Tudo bem?\n\nAqui é da Ligga Telecom! Confirmando seu agendamento:\n📅 Data: ${c.data}\n📍 Endereço: ${c.endereco}\n⏰ Período: ${c.periodo}\n\nPor favor, responda uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Cancelar visita\n\nAguardamos sua resposta!\nEquipe Ligga Telecom.`;
   } else if (tipo === "chegada") {
-    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Nosso técnico está chegando ao endereço:\n📍 ${c.endereco}\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento.\n\nAgradecemos sua atenção!`;
+    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Nosso técnico está chegou ao endereço:\n📍 ${c.endereco}\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento.\n\nAgradecemos sua atenção!`;
   }
 }
 
