@@ -37,10 +37,10 @@ function gerarMensagem(c) {
     return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento para hoje!\n\n📅 Data: ${dataHoje}\n⏰ Período: ${c.periodo}\n📍 Endereço: ${c.endereco}\n\nVocê confirma a antecipação do seu atendimento? ✅\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n⚠️ Nosso sistema não suporta chamadas ou áudios.\n\n🔶 Ligga Telecom`;
   } 
   else if (tipo === "confirmacao") {
-    return `Olá, tudo bem ${c.nome}?\n\nMeu contato é referente à **Confirmação de Agendamento – Instalação de Internet | Ligga Telecom**.\n\n📅 Agendado para: ${c.data}\n⏰ Período: ${c.periodo}\n📍 Endereço: ${c.endereco}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei o serviço\n\n⚠️ Nosso sistema não aceita áudios ou chamadas.\n\n🔶 Ligga Telecom`;
+    return `Olá, tudo bem ${c.nome}?\n\nMeu contato é referente à **Confirmação de Agendamento – | Ligga Telecom**.\n\n📅 Agendado para: ${c.data}\n⏰ Período: ${c.periodo}\n📍 Endereço: ${c.endereco}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei o serviço\n\n⚠️ Nosso sistema não aceita áudios ou chamadas.\n\n🔶 Ligga Telecom`;
   } 
   else if (tipo === "chegada") {
-    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Informamos que nosso técnico está em frente ao seu endereço para realizar a visita técnica. 🚀\n\n⚠️ Certifique-se de que haja alguém maior de 18 anos no local.\n\n🔶 Ligga Telecom`;
+    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Informamos que nosso técnico está em frente ao seu endereço ${c.endereco} para realizar a visita técnica. 🚀\n\n⚠️ Certifique-se de que haja alguém maior de 18 anos no local.\n\n🔶 Ligga Telecom`;
   }
 }
 
