@@ -2,13 +2,13 @@ body { font-family: Arial; background:#f9fafb; margin:20px; color:#333; }
 h1{text-align:center;color:#2563eb;}
 .input-area, table{width:100%; max-width:1200px; margin:20px auto;}
 input, select, button, textarea{padding:6px;margin:4px;border:1px solid #ccc;border-radius:6px;}
-button{cursor:pointer;background-color:#2563eb;color:white;border:none;transition:0.2s;}
+button{cursor:pointer;background-color:#2563eb;color:white;border:none;}
 button:hover{background-color:#1e40af;}
 table{border-collapse:collapse;width:100%;background:white;border-radius:10px;overflow:hidden;}
 th,td{border:1px solid #ddd;padding:6px;text-align:center;}
 th{background-color:#2563eb;color:white;}
 tr:nth-child(even){background-color:#f2f2f2;}
-.top-buttons{text-align:center;margin-bottom:20px;}
+.top-buttons{text-align:center;margin-bottom:10px;}
 .stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:600px;margin:0 auto 20px;}
 .card{flex:1;min-width:120px;background:white;border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
 .confirmado {border-top:4px solid #22c55e;}
@@ -16,33 +16,29 @@ tr:nth-child(even){background-color:#f2f2f2;}
 .cancelado {border-top:4px solid #ef4444;}
 .aguardando {border-top:4px solid #3b82f6;}
 textarea{width:100%; min-height:60px;}
-
-/* ===== Label com logo Ligga ===== */
-.linha-label {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 10px auto;
+.search-bar{text-align:center;margin-top:10px;}
+/* 🔵 Botões de seleção de mensagem - visual melhorado */
+.msg-btn {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.titulo-barra {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e40af;
-  margin-bottom: 6px;
+.msg-btn:hover {
+  background-color: #1e40af;
+  transform: scale(1.05);
 }
 
-.logo-mini {
-  height: 22px;
-  opacity: 0.85;
-  transition: opacity 0.2s ease;
+.msg-btn.ativo {
+  background-color: #1d4ed8;
+  box-shadow: 0 0 6px rgba(37,99,235,0.6);
 }
-
-.logo-mini:hover { opacity: 1; }
-
-/* ===== Linha de busca + botões ===== */
+/* ===== Barra superior: busca + botões de mensagem ===== */
 .linha {
   display: flex;
   align-items: center;
@@ -52,6 +48,7 @@ textarea{width:100%; min-height:60px;}
   margin-bottom: 10px;
 }
 
+/* Campo de busca */
 #pesquisa {
   flex: 1;
   min-width: 200px;
@@ -61,12 +58,14 @@ textarea{width:100%; min-height:60px;}
   font-size: 14px;
 }
 
+/* Container dos botões */
 .msg-selector {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* Botões de seleção de mensagem */
 .msg-btn {
   background: linear-gradient(135deg, #2563eb, #1e40af);
   color: white;
@@ -92,16 +91,3 @@ textarea{width:100%; min-height:60px;}
   transform: scale(1.05);
 }
 
-/* ===== Rodapé ===== */
-footer {
-  margin-top: 30px;
-  text-align: center;
-  color: #555;
-  font-size: 13px;
-}
-
-.logo-footer {
-  height: 30px;
-  opacity: 0.9;
-  margin-bottom: 5px;
-}
