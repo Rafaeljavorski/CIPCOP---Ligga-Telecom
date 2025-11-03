@@ -1,10 +1,10 @@
-// script.js — versão sem logo no rodapé
+// script.js — versão estável sem logo e com correção do WhatsApp
 let clientes = [];
-let abaWhatsApp = null;
 let tipoMensagemAtual = "antecipacao";
 
 const s = v => (v === null || v === undefined) ? "" : String(v).trim();
 
+// armazenamento local
 function salvarLocal(){ localStorage.setItem('clientes', JSON.stringify(clientes)); }
 function carregarLocal(){ const data = localStorage.getItem('clientes'); if(data){ clientes = JSON.parse(data); atualizarTabela(); } }
 window.onload = () => { carregarLocal(); atualizarMensagemPadrao(); };
@@ -13,6 +13,9 @@ window.onload = () => { carregarLocal(); atualizarMensagemPadrao(); };
 function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
+  // destaca o botão ativo
+  document.querySelectorAll(".msg-btn").forEach(b => b.classList.remove("ativo"));
+  document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
 }
 
 // ---------- ADICIONAR MANUAL ----------
@@ -78,18 +81,7 @@ function atualizarTabela(){
 
 function atualizarStatus(i, status){ clientes[i].status = status; atualizarTabela(); salvarLocal(); }
 
-// ---------- ABA FIXA WHATS ----------
-function abrirAbaWhatsApp(){
-  if(!abaWhatsApp || abaWhatsApp.closed){
-    abaWhatsApp = window.open("https://web.whatsapp.com", "whatsappWindow");
-    setTimeout(()=>{ try { abaWhatsApp.focus(); }catch(e){} }, 700);
-    alert("Aba do WhatsApp Web aberta. Aguarde o carregamento e mantenha-a aberta.");
-  } else {
-    try { abaWhatsApp.focus(); } catch(e){}
-  }
-}
-
-// ---------- ENVIO ----------
+// ---------- ENVIO (corrigido para não desconectar o WhatsApp) ----------
 function enviarMensagem(i){
   const c = clientes[i];
   const numeroRaw = s(c.celular).replace(/\D/g,"");
@@ -101,17 +93,8 @@ function enviarMensagem(i){
   const msg = gerarMensagem(c);
   const url = `https://web.whatsapp.com/send?phone=55${numeroRaw}&text=${encodeURIComponent(msg)}`;
 
-  if(abaWhatsApp && !abaWhatsApp.closed){
-    try {
-      abaWhatsApp.location.href = url;
-      abaWhatsApp.focus();
-    } catch(e) {
-      abaWhatsApp = window.open(url, "whatsappWindow");
-    }
-  } else {
-    abaWhatsApp = window.open(url, "whatsappWindow");
-    setTimeout(()=>{ try { abaWhatsApp.focus(); } catch(e){} }, 700);
-  }
+  // nova aba nomeada, sem interferir na aba principal do WhatsApp Web
+  window.open(url, "whatsappMsg");
 
   clientes[i].status = "Mensagem enviada";
   atualizarTabela();
