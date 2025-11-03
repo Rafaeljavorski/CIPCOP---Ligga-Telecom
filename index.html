@@ -1,79 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atendimento COP - Ligga Telecom</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Painel Ligga Telecom</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
+  <div class="container">
+    <h1>Painel Ligga Telecom</h1>
 
-<h1>Atendimento COP - Ligga Telecom</h1>
+    <div class="botoes-mensagens">
+      <button class="msg-btn" onclick="selecionarTipoMensagem('antecipacao')">Antecipação</button>
+      <div id="botoesPeriodo" class="botoes-periodo oculto">
+        <button class="periodo-btn" onclick="definirPeriodo('Manhã')">Manhã</button>
+        <button class="periodo-btn" onclick="definirPeriodo('Tarde')">Tarde</button>
+      </div>
+      <button class="msg-btn" onclick="selecionarTipoMensagem('confirmacao')">Confirmação</button>
+      <button class="msg-btn" onclick="selecionarTipoMensagem('chegada')">Aviso de Chegada</button>
+    </div>
 
-<div class="stats">
-  <div class="card aguardando"><strong>Aguardando</strong><p id="contAguardando">0</p></div>
-  <div class="card confirmado"><strong>Confirmados</strong><p id="contConfirmado">0</p></div>
-  <div class="card reagendado"><strong>Reagendados</strong><p id="contReagendado">0</p></div>
-  <div class="card cancelado"><strong>Cancelados</strong><p id="contCancelado">0</p></div>
-</div>
+    <h2>Mensagem Padrão</h2>
+    <textarea id="mensagemPadrao" readonly></textarea>
 
-<div class="input-area">
-  <div class="form-row">
-    <input id="cliente" placeholder="Nome do cliente">
-    <input id="celular" placeholder="Celular (somente números)">
-    <input id="contrato" placeholder="Número do Contrato">
-    <input id="data" type="date">
-    <select id="periodo">
-      <option value="">Período</option>
-      <option>Manhã</option>
-      <option>Tarde</option>
-    </select>
-    <input id="endereco" placeholder="Endereço do cliente">
-    <button onclick="adicionarCliente()">Adicionar</button>
+    <div class="formulario">
+      <input id="cliente" placeholder="Cliente">
+      <input id="celular" placeholder="Celular">
+      <input id="contrato" placeholder="Contrato">
+      <input id="data" placeholder="Data">
+      <input id="periodo" placeholder="Período">
+      <input id="endereco" placeholder="Endereço">
+      <button onclick="adicionarCliente()">Adicionar</button>
+    </div>
+
+    <div class="acoes">
+      <input type="file" id="importarCSV" accept=".csv" onchange="importarCSV(event)">
+      <button onclick="exportarCSV()">Exportar CSV</button>
+      <input id="buscaContrato" placeholder="Buscar contrato..." oninput="filtrarPorContrato()">
+      <button onclick="excluirSelecionados()">Excluir selecionados</button>
+    </div>
+
+    <div class="contadores">
+      <span>Aguardando: <b id="contAguardando">0</b></span>
+      <span>Confirmado: <b id="contConfirmado">0</b></span>
+      <span>Reagendado: <b id="contReagendado">0</b></span>
+      <span>Cancelado: <b id="contCancelado">0</b></span>
+    </div>
+
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th><input type="checkbox" onchange="selecionarTodosClientes(this)"></th>
+          <th>Cliente</th>
+          <th>Celular</th>
+          <th>Contrato</th>
+          <th>Data</th>
+          <th>Período</th>
+          <th>Endereço</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
-  <!-- substituímos o seletor pelos três botões -->
-  <div class="message-buttons">
-    <button class="msg-btn" onclick="selecionarTipoMensagem('antecipacao')">Antecipação</button>
-    <button class="msg-btn" onclick="selecionarTipoMensagem('confirmacao')">Confirmação</button>
-    <button class="msg-btn" onclick="selecionarTipoMensagem('chegada')">Aviso de Chegada</button>
-  </div>
-
-  <div class="form-row">
-    <textarea id="mensagemPadrao" placeholder="Mensagem para envio"></textarea>
-  </div>
-
-  <div class="top-buttons">
-    <button onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
-    <input type="file" id="arquivoCSV" accept=".csv" style="display:none" onchange="importarCSV(event)">
-    <button onclick="exportarCSV()">📊 Exportar Relatório</button>
-    <button onclick="excluirSelecionados()">🗑️ Excluir Selecionados</button>
-    <button onclick="abrirAbaWhatsApp()">🟢 Abrir WhatsApp Web</button>
-  </div>
-
-  <div class="search-bar">
-    <input id="buscaContrato" placeholder="🔍 Buscar por contrato..." oninput="filtrarPorContrato()">
-  </div>
-</div>
-
-<table id="tabela">
-  <thead>
-    <tr>
-      <th><input type="checkbox" id="selecionarTodos" onclick="selecionarTodosClientes(this)"></th>
-      <th>Cliente</th>
-      <th>Celular</th>
-      <th>Contrato</th>
-      <th>Data</th>
-      <th>Período</th>
-      <th>Endereço</th>
-      <th>Status</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
