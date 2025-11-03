@@ -1,4 +1,4 @@
-// script.js — versão estável sem logo e com correção do WhatsApp
+// script.js — versão final: sem logo, correção do WhatsApp e escolha de período na antecipação
 let clientes = [];
 let tipoMensagemAtual = "antecipacao";
 
@@ -36,9 +36,20 @@ function adicionarCliente(){
 // ---------- MENSAGENS ----------
 function gerarMensagem(c){
   const tipo = tipoMensagemAtual || "antecipacao";
+  let periodoMsg = c.periodo;
+
+  // se for mensagem de antecipação, permitir escolher o período manualmente
+  if (tipo === "antecipacao") {
+    let escolha = prompt("Escolha o período para esta mensagem (Manhã ou Tarde):", c.periodo || "Tarde");
+    if (escolha) {
+      escolha = escolha.trim().toLowerCase();
+      if (escolha.includes("man")) periodoMsg = "Manhã";
+      else if (escolha.includes("tar")) periodoMsg = "Tarde";
+    }
+  }
 
   if(tipo === "antecipacao"){
-    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)`;
+    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${c.data}\n⏰ Período: ${periodoMsg}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)`;
   } else if(tipo === "confirmacao"){
     return `Olá, ${c.nome}!\n\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nAguardamos sua resposta!\nEquipe Ligga Telecom`;
   } else {
@@ -93,7 +104,7 @@ function enviarMensagem(i){
   const msg = gerarMensagem(c);
   const url = `https://web.whatsapp.com/send?phone=55${numeroRaw}&text=${encodeURIComponent(msg)}`;
 
-  // nova aba nomeada, sem interferir na aba principal do WhatsApp Web
+  // abre ou reutiliza a aba "whatsappMsg" sem interferir com a principal
   window.open(url, "whatsappMsg");
 
   clientes[i].status = "Mensagem enviada";
