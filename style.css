@@ -17,3 +17,25 @@ tr:nth-child(even){background-color:#f2f2f2;}
 .aguardando {border-top:4px solid #3b82f6;}
 textarea{width:100%; min-height:60px;}
 .search-bar{text-align:center;margin-top:10px;}
+/* 🔵 Botões de seleção de mensagem - visual melhorado */
+.msg-btn {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.msg-btn:hover {
+  background-color: #1e40af;
+  transform: scale(1.05);
+}
+
+.msg-btn.ativo {
+  background-color: #1d4ed8;
+  box-shadow: 0 0 6px rgba(37,99,235,0.6);
+}
+
