@@ -35,3 +35,8 @@ textarea{width:100%; min-height:60px;}
 .msg-btn:hover {
   background-color:#1e40af;
 }
+.msg-btn.ativo {
+  background-color: #1e3a8a;
+  color: #fff;
+  font-weight: bold;
+}
