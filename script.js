@@ -30,7 +30,7 @@ function adicionarCliente(){
 function gerarMensagem(c){
   const tipo = document.getElementById('tipoMensagem').value || 'antecipacao';
   const dataUso = hojeFormatado(); // always today's date as requested
-  const rodape = '\n\n🟠 Ligga Telecom 🟠';
+  const rodape = '\n\n🟠 Ligga Telecom';
   if(tipo === 'antecipacao'){
     return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${dataUso}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)${rodape}`;
   } else if(tipo === 'confirmacao'){
