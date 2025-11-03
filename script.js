@@ -26,17 +26,20 @@ function adicionarCliente(){
 }
 
 // ---------- MENSAGENS ----------
+// Generate message - uses today's date override
 function gerarMensagem(c){
-  const tipo = document.getElementById('tipoMensagem').value || "antecipacao";
-  if(tipo === "antecipacao"){
-    // antes de enviar, se quiser permitir alteração, poderia perguntar aqui
-    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)`;
-  } else if(tipo === "confirmacao"){
-    return `Olá, ${c.nome}!\n\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nAguardamos sua resposta!\nEquipe Ligga Telecom`;
-  } else { // chegada
-    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Nosso técnico está em frente ao seu endereço (${c.endereco}) para realizar a visita técnica. 🚀\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️\n\nAgradecemos a sua atenção!\nEquipe Ligga Telecom`;
+  const tipo = document.getElementById('tipoMensagem').value || 'antecipacao';
+  const dataUso = hojeFormatado(); // always today's date as requested
+  const rodape = '\n\n🟠 Ligga Telecom 🟠';
+  if(tipo === 'antecipacao'){
+    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${dataUso}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)${rodape}`;
+  } else if(tipo === 'confirmacao'){
+    return `Olá, ${c.nome}! Tudo bem?\n\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${dataUso}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nAguardamos sua resposta!${rodape}`;
+  } else {
+    return `Olá, ${c.nome}!\n\nAqui é da Ligga Telecom. Nosso técnico está em frente ao seu endereço (${c.endereco}) para realizar a visita técnica. 🚀\n\n⚠️ Pedimos que haja alguém maior de 18 anos no local durante o atendimento. ⚠️\n\nAgradecemos a sua atenção!${rodape}`;
   }
 }
+
 
 function atualizarMensagemPadrao(){
   const exemplo = { nome:"Cliente", data:"dd/mm/aaaa", periodo:"Manhã/Tarde", endereco:"Rua Exemplo, 123" };
