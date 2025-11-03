@@ -118,7 +118,7 @@ function importarCSV(e){
 function formatarPeriodo(p){
   if(!p) return "Tarde";
   const hora = p.match(/\d+/);
-  if(hora && parseInt(hora[0]) <= 13) return "Manhã";
+  if(hora && parseInt(hora[0]) <= 12) return "Manhã";
   return "Tarde";
 }
 
