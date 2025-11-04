@@ -34,10 +34,10 @@
   </div>
 
   <div class="form-row">
-    <select id="tipoMensagem" onchange="atualizarMensagemPadrao()">
-      <option value="antecipacao">Mensagem de Antecipação</option>
-      <option value="confirmacao">Mensagem de Confirmação</option>
-      <option value="chegada">Aviso Chegada Técnico</option>
+  <select id="tipoMensagem" onchange="selecionarTipoMensagem(this.value)">
+  <option value="antecipacao">Mensagem de Antecipação</option>
+  <option value="confirmacao">Mensagem de Confirmação</option>
+  <option value="chegada">Aviso de Chegada do Técnico</option>
     </select>
     <textarea id="mensagemPadrao" placeholder="Mensagem para envio"></textarea>
   </div>
