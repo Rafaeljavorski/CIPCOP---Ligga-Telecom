@@ -23,17 +23,17 @@ window.onload = () => {
 };
 
 // ===============================
-// Selecionar tipo de mensagem
+// SELEÇÃO DE MENSAGENS (BOTÕES)
 // ===============================
 function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
-  // Remove botões antigos, se houver
+  // Remove botões secundários anteriores (Manhã/Tarde/Manter)
   const antigos = document.querySelector(".botoes-periodo");
   if (antigos) antigos.remove();
 
-  // Adiciona botões "☀️ Manhã" e "🌙 Tarde" apenas se o tipo for antecipação
+  // Se for antecipação, cria botões secundários
   if (tipo === "antecipacao") {
     const container = document.querySelector(".botoes-mensagens");
     const div = document.createElement("div");
@@ -41,25 +41,26 @@ function selecionarTipoMensagem(tipo) {
     div.innerHTML = `
       <button class="msg-btn periodo-btn" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
       <button class="msg-btn periodo-btn" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
+      <button class="msg-btn periodo-btn" onclick="definirPeriodo('Manter')">🔁 Manter Data</button>
     `;
     container.insertAdjacentElement("afterend", div);
   }
 
-  // Destaca o botão selecionado
+  // Destaca o botão ativo
   document.querySelectorAll(".msg-btn").forEach((b) => b.classList.remove("ativo"));
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
 }
 
 // Define o período escolhido e remove os botões
 function definirPeriodo(periodo) {
-  periodoEscolhido = periodo;
+  periodoEscolhido = periodo === "Manter" ? "" : periodo;
   atualizarMensagemPadrao();
   const botoes = document.querySelector(".botoes-periodo");
   if (botoes) botoes.remove();
 }
 
 // ===============================
-// Adicionar cliente manualmente
+// ADICIONAR CLIENTE
 // ===============================
 function adicionarCliente() {
   const nome = document.getElementById("cliente").value.trim();
@@ -80,7 +81,7 @@ function adicionarCliente() {
 }
 
 // ===============================
-// Gerar mensagem conforme o tipo
+// GERAR MENSAGEM
 // ===============================
 function gerarMensagem(c) {
   const tipo = tipoMensagemAtual || "antecipacao";
@@ -107,7 +108,7 @@ function atualizarMensagemPadrao() {
 }
 
 // ===============================
-// Atualizar tabela de clientes
+// TABELA
 // ===============================
 function atualizarTabela() {
   const tbody = document.querySelector("#tabela tbody");
@@ -137,7 +138,7 @@ function atualizarTabela() {
 }
 
 // ===============================
-// Ações
+// AÇÕES
 // ===============================
 function atualizarStatus(i, status) {
   clientes[i].status = status;
@@ -160,7 +161,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// Importar / Exportar CSV
+// IMPORTAR CSV (CORRIGIDO)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -171,14 +172,30 @@ function importarCSV(e) {
     skipEmptyLines: true,
     complete: function (res) {
       res.data.forEach((row) => {
+        // busca flexível (ignora maiúsculas/minúsculas)
+        const get = (keys) =>
+          keys.map((k) => Object.keys(row).find((x) => x.toLowerCase().trim() === k.toLowerCase())).find((x) => x)
+            ? row[Object.keys(row).find((x) => x.toLowerCase().trim() === keys[0].toLowerCase())]
+            : "";
+
         const nome = row["Nome"] || row["Cliente"] || "";
         const celular = row["Celular"] || row["Telefone"] || "";
         const contrato = row["Contrato"] || "";
-        const data = row["Data Agendada"] || row["Data"] || "";
-        const periodo = row["Período Agendado"] || row["Período"] || "";
+        const data = row["Data Agendada"] || row["data agendada"] || row["Data"] || "";
+        const periodo = row["Período Agendado"] || row["periodo agendado"] || row["Período"] || "";
         const endereco = row["Endereço"] || "";
+
         if (!contrato || !nome || !celular) return;
-        clientes.push({ nome, celular, contrato, data, periodo, endereco, status: "Importado" });
+
+        clientes.push({
+          nome,
+          celular,
+          contrato,
+          data,
+          periodo,
+          endereco,
+          status: "Importado",
+        });
       });
       atualizarTabela();
       salvarLocal();
@@ -186,6 +203,9 @@ function importarCSV(e) {
   });
 }
 
+// ===============================
+// EXPORTAR CSV
+// ===============================
 function exportarCSV() {
   let csv = "Cliente,Celular,Contrato,Data,Período,Endereço,Status\n";
   clientes.forEach((c) => {
@@ -199,7 +219,7 @@ function exportarCSV() {
 }
 
 // ===============================
-// Utilidades
+// UTILITÁRIOS
 // ===============================
 function selecionarTodosClientes(chk) {
   document.querySelectorAll(".checkContato").forEach((cb) => (cb.checked = chk.checked));
