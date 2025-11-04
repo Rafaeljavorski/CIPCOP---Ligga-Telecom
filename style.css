@@ -1,141 +1,65 @@
+body { font-family: Arial; background:#f9fafb; margin:20px; color:#333; }
+h1{text-align:center;color:#2563eb;}
+.input-area, table{width:100%; max-width:1200px; margin:20px auto;}
+input, select, button, textarea{padding:6px;margin:4px;border:1px solid #ccc;border-radius:6px;}
+button{cursor:pointer;background-color:#2563eb;color:white;border:none;}
+button:hover{background-color:#1e40af;}
+table{border-collapse:collapse;width:100%;background:white;border-radius:10px;overflow:hidden;}
+th,td{border:1px solid #ddd;padding:6px;text-align:center;}
+th{background-color:#2563eb;color:white;}
+tr:nth-child(even){background-color:#f2f2f2;}
+.top-buttons{text-align:center;margin-bottom:10px;}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:600px;margin:0 auto 20px;}
+.card{flex:1;min-width:120px;background:white;border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.confirmado {border-top:4px solid #22c55e;}
+.reagendado {border-top:4px solid #facc15;}
+.cancelado {border-top:4px solid #ef4444;}
+.aguardando {border-top:4px solid #3b82f6;}
+textarea{width:100%; min-height:60px;}
+.search-bar{text-align:center;margin-top:10px;}
 /* ===============================
-   ESTILOS PRINCIPAIS ORIGINAIS
+   BOTÕES "☀️ MANHÃ" / "🌙 TARDE"
    =============================== */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f0f2f5;
-  margin: 0;
-  padding: 0;
-}
 
-.container {
-  width: 95%;
-  max-width: 1200px;
-  margin: 20px auto;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* Botões principais de mensagens */
-.botoes-mensagens {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.msg-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-.msg-btn:hover {
-  background-color: #0056b3;
-}
-
-.msg-btn.ativo {
-  background-color: #0056b3;
-}
-
-/* Formulário */
-.formulario {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.formulario input {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-/* Caixa de mensagem padrão */
-.mensagem-container {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#mensagemPadrao {
-  width: 90%;
-  height: 150px;
-  border-radius: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  resize: none;
-}
-
-/* Ações e contadores */
-.acoes, .contadores {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 8px;
-  border: 1px solid #ccc;
-  text-align: center;
-}
-
-/* ===============================
-   ADIÇÃO 1: Botões "Manhã" e "Tarde"
-   =============================== */
+/* Contêiner onde os botões aparecem */
 .botoes-periodo {
   margin-top: 8px;
   text-align: center;
 }
 
+/* Mesmo estilo dos botões principais, só um tom mais claro */
 .periodo-btn {
-  background-color: #6ca8ff; /* tom mais claro do azul original */
+  background-color: #5ca2ff; /* azul mais claro */
   color: white;
   border: none;
-  padding: 8px 18px;
-  margin: 3px;
+  padding: 8px 16px;
+  margin: 4px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
 .periodo-btn:hover {
-  background-color: #3b82f6; /* azul médio ao passar o mouse */
+  background-color: #007bff; /* mesmo azul do botão principal ao passar o mouse */
 }
 
 /* ===============================
-   ADIÇÃO 2: Botão de enviar com ícone do WhatsApp
+   BOTÃO DE ENVIAR COM ÍCONE DO WHATSAPP
    =============================== */
 .btn-enviar {
-  background-color: #25d366; /* verde WhatsApp */
+  background-color: #25d366; /* verde padrão WhatsApp */
   color: white;
   border: none;
   border-radius: 5px;
-  padding: 6px 10px;
+  padding: 5px 10px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.3s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s;
 }
 
 .btn-enviar img {
