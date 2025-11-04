@@ -160,9 +160,6 @@ function enviarMensagem(i) {
   salvarLocal();
 }
 
-// ===============================
-// IMPORTAR CSV (CORRIGIDO)
-// ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
   if (!file) return alert("Arquivo não selecionado.");
@@ -172,18 +169,23 @@ function importarCSV(e) {
     skipEmptyLines: true,
     complete: function (res) {
       res.data.forEach((row) => {
-        // busca flexível (ignora maiúsculas/minúsculas)
-        const get = (keys) =>
-          keys.map((k) => Object.keys(row).find((x) => x.toLowerCase().trim() === k.toLowerCase())).find((x) => x)
-            ? row[Object.keys(row).find((x) => x.toLowerCase().trim() === keys[0].toLowerCase())]
-            : "";
+        // Função auxiliar para buscar coluna ignorando maiúsculas/minúsculas e espaços
+        const getCol = (...nomes) => {
+          for (const nome of nomes) {
+            const chave = Object.keys(row).find(
+              (k) => k.trim().toLowerCase() === nome.trim().toLowerCase()
+            );
+            if (chave) return row[chave].trim();
+          }
+          return "";
+        };
 
-        const nome = row["Nome"] || row["Cliente"] || "";
-        const celular = row["Celular"] || row["Telefone"] || "";
-        const contrato = row["Contrato"] || "";
-        const data = row["Data Agendada"] || row["data agendada"] || row["Data"] || "";
-        const periodo = row["Período Agendado"] || row["periodo agendado"] || row["Período"] || "";
-        const endereco = row["Endereço"] || "";
+        const nome = getCol("Nome", "Cliente");
+        const celular = getCol("Celular", "Telefone");
+        const contrato = getCol("Contrato");
+        const data = getCol("Data Agendada", "Data", "Agendamento", "Data de Agendamento");
+        const periodo = getCol("Período Agendado", "Periodo Agendado", "Período", "Periodo");
+        const endereco = getCol("Endereço", "Endereco");
 
         if (!contrato || !nome || !celular) return;
 
@@ -197,11 +199,13 @@ function importarCSV(e) {
           status: "Importado",
         });
       });
+
       atualizarTabela();
       salvarLocal();
     },
   });
 }
+
 
 // ===============================
 // EXPORTAR CSV
