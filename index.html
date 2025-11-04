@@ -33,6 +33,10 @@
     <button onclick="adicionarCliente()">Adicionar</button>
   </div>
 
+<!-- ===================================== -->
+<!-- SEÇÃO DE ESCOLHA DE TIPO DE MENSAGEM -->
+<!-- ===================================== -->
+
 <div class="botoes-mensagens" style="text-align: center; margin-bottom: 10px;">
   <button class="msg-btn" onclick="selecionarTipoMensagem('antecipacao')">
     📅 Mensagem de Antecipação
@@ -44,6 +48,16 @@
     🚗 Aviso de Chegada do Técnico
   </button>
 </div>
+
+<!-- ===================================== -->
+<!-- ÁREA DE VISUALIZAÇÃO DA MENSAGEM -->
+<!-- ===================================== -->
+
+<div class="mensagem-container" style="margin-top: 10px;">
+  <label for="mensagemPadrao" style="font-weight: bold;">Mensagem para o Cliente:</label>
+  <textarea id="mensagemPadrao" rows="8" style="width: 100%; margin-top: 5px;" readonly></textarea>
+</div>
+
 
   <div class="top-buttons">
     <button onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
