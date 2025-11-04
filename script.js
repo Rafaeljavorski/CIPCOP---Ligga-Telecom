@@ -1,5 +1,6 @@
 let clientes = [];
 let tipoMensagemAtual = "";
+let periodoEscolhido = "";
 
 // ===============================
 // Salvar e carregar clientes
@@ -28,8 +29,33 @@ function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
+  // Remove botões antigos, se houver
+  const antigos = document.querySelector(".botoes-periodo");
+  if (antigos) antigos.remove();
+
+  // Adiciona botões "☀️ Manhã" e "🌙 Tarde" apenas se o tipo for antecipação
+  if (tipo === "antecipacao") {
+    const container = document.querySelector(".botoes-mensagens");
+    const div = document.createElement("div");
+    div.className = "botoes-periodo";
+    div.innerHTML = `
+      <button class="msg-btn periodo-btn" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
+      <button class="msg-btn periodo-btn" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
+    `;
+    container.insertAdjacentElement("afterend", div);
+  }
+
+  // Destaca o botão selecionado
   document.querySelectorAll(".msg-btn").forEach((b) => b.classList.remove("ativo"));
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
+}
+
+// Define o período escolhido e remove os botões
+function definirPeriodo(periodo) {
+  periodoEscolhido = periodo;
+  atualizarMensagemPadrao();
+  const botoes = document.querySelector(".botoes-periodo");
+  if (botoes) botoes.remove();
 }
 
 // ===============================
@@ -58,9 +84,10 @@ function adicionarCliente() {
 // ===============================
 function gerarMensagem(c) {
   const tipo = tipoMensagemAtual || "antecipacao";
+  const periodoMsg = periodoEscolhido || c.periodo || "Manhã/Tarde";
 
   if (tipo === "antecipacao") {
-    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)`;
+    return `Olá, Prezado(a) ${c.nome}!\n\nAqui é da Ligga Telecom, tudo bem? 😊\n\nIdentificamos a possibilidade de antecipar o seu atendimento.\n\n📅 Data: ${c.data}\n⏰ Período: ${periodoMsg}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nVocê confirma a antecipação do seu atendimento?\n1️⃣ SIM, CONFIRMAR\n2️⃣ NÃO, MANTER DATA ATUAL\n\n(Nosso sistema não aceita áudios ou chamadas telefônicas.)`;
   } else if (tipo === "confirmacao") {
     return `Olá, ${c.nome}!\n\nMeu contato é referente à Confirmação de Agendamento – Instalação de Internet | Ligga Telecom.\n\n📅 Agendado: ${c.data}\n⏰ Período: ${c.periodo}\n🏠 Endereço: ${c.endereco}\n🔢 Contrato: ${c.contrato}\n\nPor favor, selecione uma das opções abaixo:\n1️⃣ Confirmar atendimento\n2️⃣ Preciso reagendar\n3️⃣ Já cancelei os serviços\n\nAguardamos sua resposta!\nEquipe Ligga Telecom`;
   } else {
