@@ -17,3 +17,23 @@ tr:nth-child(even){background-color:#f2f2f2;}
 .aguardando {border-top:4px solid #3b82f6;}
 textarea{width:100%; min-height:60px;}
 .search-bar{text-align:center;margin-top:10px;}
+.botoes-periodo {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.periodo-btn {
+  background-color: #5ca2ff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin: 3px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.periodo-btn:hover {
+  background-color: #007bff;
+}
