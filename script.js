@@ -12,17 +12,32 @@ function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
+  // Remove botões de período se existirem
+  const antigos = document.querySelector('.botoes-periodo-temp');
+  if (antigos) antigos.remove();
+
+  // Se for antecipação, mostra os dois botões (Manhã / Tarde)
+  if (tipo === "antecipacao") {
+    const container = document.querySelector(".botoes-mensagens");
+    const div = document.createElement("div");
+    div.className = "botoes-periodo-temp";
+    div.innerHTML = `
+      <button class="periodo-btn manha" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
+      <button class="periodo-btn tarde" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
+    `;
+    container.appendChild(div);
+  }
+
+  // Destaca botão ativo
   document.querySelectorAll(".msg-btn").forEach(b => b.classList.remove("ativo"));
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
-
-  const botoesPeriodo = document.getElementById("botoesPeriodo");
-  botoesPeriodo.classList.toggle("oculto", tipo !== "antecipacao");
 }
 
 function definirPeriodo(periodo) {
   periodoEscolhido = periodo;
   atualizarMensagemPadrao();
-  document.getElementById("botoesPeriodo").classList.add("oculto");
+  const botoes = document.querySelector('.botoes-periodo-temp');
+  if (botoes) botoes.remove();
 }
 
 function adicionarCliente(){
@@ -72,7 +87,10 @@ function atualizarTabela(){
       <td>${c.endereco}</td>
       <td>${c.status}</td>
       <td>
-        <button onclick="enviarMensagem(${i})">📤 Enviar</button>
+        <button class="btn-enviar" onclick="enviarMensagem(${i})">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="16" style="vertical-align:middle;margin-right:4px;">
+          Enviar
+        </button>
         <button onclick="atualizarStatus(${i},'Confirmado')">✅</button>
         <button onclick="atualizarStatus(${i},'Reagendado')">📅</button>
         <button onclick="atualizarStatus(${i},'Cancelado')">❌</button>
@@ -99,7 +117,7 @@ function enviarMensagem(i){
   atualizarTabela(); salvarLocal();
 }
 
-// IMPORTAÇÃO, EXPORTAÇÃO, FILTRO, CONTADORES — mesmas funções da versão anterior
+// Funções de importação, exportação e contadores mantidas iguais
 function importarCSV(e){
   const file = e.target.files[0];
   if(!file) return alert("Arquivo não selecionado.");
