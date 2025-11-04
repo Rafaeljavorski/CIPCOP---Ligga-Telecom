@@ -12,23 +12,22 @@ function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
-  // Remove botões de período se existirem
-  const antigos = document.querySelector('.botoes-periodo-temp');
+  // remove botões de período se já existirem
+  const antigos = document.querySelector('.botoes-periodo');
   if (antigos) antigos.remove();
 
-  // Se for antecipação, mostra os dois botões (Manhã / Tarde)
+  // cria botões Manhã/Tarde somente ao clicar em Antecipação
   if (tipo === "antecipacao") {
     const container = document.querySelector(".botoes-mensagens");
     const div = document.createElement("div");
-    div.className = "botoes-periodo-temp";
+    div.className = "botoes-periodo";
     div.innerHTML = `
-      <button class="periodo-btn manha" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
-      <button class="periodo-btn tarde" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
+      <button class="msg-btn periodo-btn manha" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
+      <button class="msg-btn periodo-btn tarde" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
     `;
     container.appendChild(div);
   }
 
-  // Destaca botão ativo
   document.querySelectorAll(".msg-btn").forEach(b => b.classList.remove("ativo"));
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
 }
@@ -36,7 +35,7 @@ function selecionarTipoMensagem(tipo) {
 function definirPeriodo(periodo) {
   periodoEscolhido = periodo;
   atualizarMensagemPadrao();
-  const botoes = document.querySelector('.botoes-periodo-temp');
+  const botoes = document.querySelector('.botoes-periodo');
   if (botoes) botoes.remove();
 }
 
@@ -88,7 +87,7 @@ function atualizarTabela(){
       <td>${c.status}</td>
       <td>
         <button class="btn-enviar" onclick="enviarMensagem(${i})">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="16" style="vertical-align:middle;margin-right:4px;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="16" style="vertical-align:middle;margin-right:4px;">
           Enviar
         </button>
         <button onclick="atualizarStatus(${i},'Confirmado')">✅</button>
@@ -117,7 +116,7 @@ function enviarMensagem(i){
   atualizarTabela(); salvarLocal();
 }
 
-// Funções de importação, exportação e contadores mantidas iguais
+// Importação, exportação e contadores — mantidos iguais
 function importarCSV(e){
   const file = e.target.files[0];
   if(!file) return alert("Arquivo não selecionado.");
