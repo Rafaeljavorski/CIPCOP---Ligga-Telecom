@@ -1,179 +1,149 @@
+/* ===============================
+   ESTILOS PRINCIPAIS ORIGINAIS
+   =============================== */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f7fb;
+  background-color: #f0f2f5;
   margin: 0;
   padding: 0;
 }
 
 .container {
   width: 95%;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 20px auto;
-  background: white;
+  background-color: #fff;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
 }
 
 h1 {
   text-align: center;
-  color: #1e3a8a;
+  margin-bottom: 20px;
 }
 
+/* Botões principais de mensagens */
 .botoes-mensagens {
   text-align: center;
   margin-bottom: 10px;
 }
 
 .msg-btn {
-  background-color: #3b82f6;
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 20px;
   margin: 5px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.2s;
-}
-.msg-btn:hover { background-color: #1e3a8a; }
-.msg-btn.ativo { background-color: #1e40af; }
-
-.botoes-periodo {
-  margin-top: 5px;
-  text-align: center;
-}
-.botoes-periodo.oculto {
-  display: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
 }
 
-.periodo-btn {
-  background-color: #cfe0ff;
-  color: #1e3a8a;
-  border: 1px solid #a8c0ff;
-  padding: 6px 14px;
-  margin: 3px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
-}
-.periodo-btn:hover {
-  background-color: #b7d0ff;
+.msg-btn:hover {
+  background-color: #0056b3;
 }
 
-textarea {
-  width: 100%;
-  height: 160px;
-  margin-top: 10px;
-  border-radius: 8px;
+.msg-btn.ativo {
+  background-color: #0056b3;
+}
+
+/* Formulário */
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.formulario input {
+  padding: 8px;
+  border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+/* Caixa de mensagem padrão */
+.mensagem-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#mensagemPadrao {
+  width: 90%;
+  height: 150px;
+  border-radius: 5px;
   padding: 10px;
+  border: 1px solid #ccc;
   resize: none;
 }
 
-.formulario, .acoes {
-  margin-top: 15px;
+/* Ações e contadores */
+.acoes, .contadores {
   text-align: center;
-}
-
-input {
-  margin: 3px;
-  padding: 7px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-button {
-  cursor: pointer;
-}
-
-.contadores {
-  margin-top: 15px;
-  text-align: center;
-  font-size: 15px;
-}
-.contadores span {
-  margin: 0 10px;
+  margin-bottom: 15px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
 }
 
 th, td {
-  border: 1px solid #ddd;
   padding: 8px;
+  border: 1px solid #ccc;
   text-align: center;
 }
 
-th {
-  background-color: #e0e7ff;
-  color: #1e3a8a;
-}
-/* Botões temporários de período (Manhã/Tarde) */
-.botoes-periodo-temp {
-  margin-top: 6px;
+/* ===============================
+   ADIÇÃO 1: Botões "Manhã" e "Tarde"
+   =============================== */
+.botoes-periodo {
+  margin-top: 8px;
   text-align: center;
 }
 
 .periodo-btn {
+  background-color: #6ca8ff; /* tom mais claro do azul original */
+  color: white;
   border: none;
-  border-radius: 8px;
   padding: 8px 18px;
-  margin: 4px;
+  margin: 3px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
-  color: #fff;
-  transition: transform 0.2s;
-}
-.periodo-btn:hover {
-  transform: scale(1.05);
-}
-.periodo-btn.manha {
-  background-color: #fbbf24; /* amarelo */
-}
-.periodo-btn.tarde {
-  background-color: #fb923c; /* laranja */
+  transition: background-color 0.3s;
 }
 
-/* Ícone do WhatsApp no botão de envio */
+.periodo-btn:hover {
+  background-color: #3b82f6; /* azul médio ao passar o mouse */
+}
+
+/* ===============================
+   ADIÇÃO 2: Botão de enviar com ícone do WhatsApp
+   =============================== */
 .btn-enviar {
-  background-color: #25d366;
+  background-color: #25d366; /* verde WhatsApp */
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   padding: 6px 10px;
   cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-enviar:hover {
-  background-color: #1da955;
-}
-/* Botões Manhã/Tarde (mesmo estilo, mas levemente mais claros) */
-.botoes-periodo {
-  margin-top: 5px;
-  text-align: center;
-}
-.periodo-btn {
-  background-color: #5a8dfb;
-  opacity: 0.9;
-}
-.periodo-btn:hover {
-  opacity: 1;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Ícone WhatsApp no botão de envio */
-.btn-enviar {
-  background-color: #25d366;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 10px;
-  cursor: pointer;
+.btn-enviar img {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
 }
+
 .btn-enviar:hover {
   background-color: #1da955;
 }
