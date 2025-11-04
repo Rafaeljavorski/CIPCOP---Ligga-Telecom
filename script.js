@@ -41,7 +41,6 @@ function selecionarTipoMensagem(tipo) {
     div.innerHTML = `
       <button class="msg-btn periodo-btn" onclick="definirPeriodo('Manhã')">☀️ Manhã</button>
       <button class="msg-btn periodo-btn" onclick="definirPeriodo('Tarde')">🌙 Tarde</button>
-      <button class="msg-btn periodo-btn" onclick="definirPeriodo('Manter')">🔁 Manter Data</button>
     `;
     container.insertAdjacentElement("afterend", div);
   }
