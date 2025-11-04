@@ -33,14 +33,17 @@
     <button onclick="adicionarCliente()">Adicionar</button>
   </div>
 
-  <div class="form-row">
-  <select id="tipoMensagem" onchange="selecionarTipoMensagem(this.value)">
-  <option value="antecipacao">Mensagem de Antecipação</option>
-  <option value="confirmacao">Mensagem de Confirmação</option>
-  <option value="chegada">Aviso de Chegada do Técnico</option>
-    </select>
-    <textarea id="mensagemPadrao" placeholder="Mensagem para envio"></textarea>
-  </div>
+<div class="botoes-mensagens" style="text-align: center; margin-bottom: 10px;">
+  <button class="msg-btn" onclick="selecionarTipoMensagem('antecipacao')">
+    📅 Mensagem de Antecipação
+  </button>
+  <button class="msg-btn" onclick="selecionarTipoMensagem('confirmacao')">
+    ✅ Mensagem de Confirmação
+  </button>
+  <button class="msg-btn" onclick="selecionarTipoMensagem('chegada')">
+    🚗 Aviso de Chegada do Técnico
+  </button>
+</div>
 
   <div class="top-buttons">
     <button onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
