@@ -183,7 +183,7 @@ function importarCSV(e) {
         const nome = getCol("Nome", "Cliente");
         const celular = getCol("Celular", "Telefone");
         const contrato = getCol("Contrato");
-        const data = getCol("Data Agendada", "Data", "Agendamento", "Data de Agendamento");
+        const data = getCol("Data agendada", "Data Agendada", "Data", "Agendamento", "Data de Agendamento");
         const periodo = getCol("Período Agendado", "Periodo Agendado", "Período", "Periodo");
         const endereco = getCol("Endereço", "Endereco");
 
