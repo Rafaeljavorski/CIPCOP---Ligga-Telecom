@@ -152,3 +152,28 @@ th {
 .btn-enviar:hover {
   background-color: #1da955;
 }
+/* Botões Manhã/Tarde (mesmo estilo, mas levemente mais claros) */
+.botoes-periodo {
+  margin-top: 5px;
+  text-align: center;
+}
+.periodo-btn {
+  background-color: #5a8dfb;
+  opacity: 0.9;
+}
+.periodo-btn:hover {
+  opacity: 1;
+}
+
+/* Ícone WhatsApp no botão de envio */
+.btn-enviar {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.btn-enviar:hover {
+  background-color: #1da955;
+}
