@@ -112,3 +112,43 @@ th {
   background-color: #e0e7ff;
   color: #1e3a8a;
 }
+/* Botões temporários de período (Manhã/Tarde) */
+.botoes-periodo-temp {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.periodo-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  margin: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff;
+  transition: transform 0.2s;
+}
+.periodo-btn:hover {
+  transform: scale(1.05);
+}
+.periodo-btn.manha {
+  background-color: #fbbf24; /* amarelo */
+}
+.periodo-btn.tarde {
+  background-color: #fb923c; /* laranja */
+}
+
+/* Ícone do WhatsApp no botão de envio */
+.btn-enviar {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-enviar:hover {
+  background-color: #1da955;
+}
