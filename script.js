@@ -189,7 +189,7 @@ function importarCSV(e) {
 
         // Nome e Celular com fallback
         const nome =
-          linha["nome"] || linha["cliente"] || linha["solicitante"] || "(Sem nome)";
+          linha["nome"] || linha["cliente"] || linha["nome solicitante"] linha["Nome Solicitante"] || "(Sem nome)";
 
         const celular =
           linha["celular"] ||
@@ -199,6 +199,7 @@ function importarCSV(e) {
           linha["telefone cliente"] ||
           linha["telefone 1"] ||
           linha["contato"] ||
+          
           "";
 
         const contrato =
