@@ -55,7 +55,7 @@ function definirPeriodo(periodo) {
 }
 
 // ===============================
-// ADICIONAR CLIENTE
+// ADICIONAR CLIENTE MANUALMENTE
 // ===============================
 function adicionarCliente() {
   const nome = document.getElementById("cliente").value.trim();
@@ -76,7 +76,7 @@ function adicionarCliente() {
 }
 
 // ===============================
-// GERAR MENSAGEM
+// GERAR MENSAGEM PADRÃO
 // ===============================
 function gerarMensagem(c) {
   const tipo = tipoMensagemAtual || "antecipacao";
@@ -103,7 +103,7 @@ function atualizarMensagemPadrao() {
 }
 
 // ===============================
-// TABELA
+// TABELA DE CLIENTES
 // ===============================
 function atualizarTabela() {
   const tbody = document.querySelector("#tabela tbody");
@@ -133,7 +133,7 @@ function atualizarTabela() {
 }
 
 // ===============================
-// AÇÕES
+// AÇÕES (ENVIAR, STATUS)
 // ===============================
 function atualizarStatus(i, status) {
   clientes[i].status = status;
@@ -156,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (com detecção automática e depuração)
+// IMPORTAR CSV (com filtro de Cancelado/Refeição)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -167,81 +167,60 @@ function importarCSV(e) {
     skipEmptyLines: true,
     complete: function (res) {
       const camposOriginais = res.meta?.fields || Object.keys(res.data[0] || {});
-      const camposLimpos = camposOriginais.map((c) =>
-        String(c || "")
-          .replace(/["']/g, "")
-          .replace(/^\uFEFF/, "")
-          .trim()
-          .toLowerCase()
-      );
-
-      console.log("📋 Cabeçalhos detectados no CSV:", camposOriginais);
-      console.log("📋 Cabeçalhos normalizados:", camposLimpos);
+      console.log("📋 Cabeçalhos detectados:", camposOriginais);
 
       let importados = 0;
+      let ignorados = 0;
 
       res.data.forEach((row, idx) => {
-        const linhaNormalizada = {};
+        const linha = {};
         Object.keys(row).forEach((chave) => {
-          const chaveLimpa = String(chave || "")
-            .replace(/["']/g, "")
-            .replace(/^\uFEFF/, "")
-            .trim()
-            .toLowerCase();
-          linhaNormalizada[chaveLimpa] = String(row[chave] || "").trim();
+          const limpa = String(chave || "").replace(/["']/g, "").replace(/^\uFEFF/, "").trim().toLowerCase();
+          linha[limpa] = String(row[chave] || "").trim();
         });
 
-        const nomeKeys = [
-          "nome",
-          "cliente",
-          "responsável",
-          "responsavel",
-          "assinante",
-          "usuario",
-          "solicitante",
-        ];
-        const nomeKey = nomeKeys.find((k) => linhaNormalizada[k]) || "";
-        const nome = nomeKey ? linhaNormalizada[nomeKey] : "(Sem nome)";
+        // Ignora "Cancelado" e "Refeição"
+        const statusAtividade = (linha["status da atividade"] || linha["status"] || "").toLowerCase();
+        if (statusAtividade.includes("cancelado") || statusAtividade.includes("refeição")) {
+          ignorados++;
+          console.log(`⏭️ Ignorado linha ${idx + 1} (${statusAtividade})`);
+          return;
+        }
 
-        const celularKeys = [
-          "celular",
-          "telefone",
-          "telefone 1",
-          "telefone cliente",
-          "telefone solicitante",
-          "solicitante telefone",
-          "telefone do solicitante",
-          "contato",
-          "número",
-          "numero",
-        ];
-        const celularKey = celularKeys.find((k) => linhaNormalizada[k]) || "";
-        const celular = celularKey ? linhaNormalizada[celularKey] : "";
+        // Nome e Celular com fallback
+        const nome =
+          linha["nome"] || linha["cliente"] || linha["solicitante"] || "(Sem nome)";
+
+        const celular =
+          linha["celular"] ||
+          linha["telefone"] ||
+          linha["telefone solicitante"] ||
+          linha["solicitante telefone"] ||
+          linha["telefone cliente"] ||
+          linha["telefone 1"] ||
+          linha["contato"] ||
+          "";
 
         const contrato =
-          linhaNormalizada["contrato"] ||
-          linhaNormalizada["n° contrato"] ||
-          linhaNormalizada["nº contrato"] ||
-          linhaNormalizada["num contrato"] ||
-          linhaNormalizada["numero contrato"] ||
+          linha["contrato"] ||
+          linha["nº contrato"] ||
+          linha["n° contrato"] ||
+          linha["numero contrato"] ||
           "";
 
         const data =
-          linhaNormalizada["data agendada"] ||
-          linhaNormalizada["data"] ||
-          linhaNormalizada["agendamento"] ||
-          "";
+          linha["data agendada"] || linha["data"] || linha["agendamento"] || "";
 
         const periodo =
-          linhaNormalizada["período agendado"] ||
-          linhaNormalizada["periodo agendado"] ||
-          linhaNormalizada["periodo"] ||
+          linha["período agendado"] ||
+          linha["periodo agendado"] ||
+          linha["periodo"] ||
           "";
 
         const endereco =
-          linhaNormalizada["endereço"] ||
-          linhaNormalizada["endereco"] ||
-          linhaNormalizada["logradouro"] ||
+          linha["endereço"] ||
+          linha["endereco"] ||
+          linha["logradouro"] ||
           "";
 
         clientes.push({
@@ -253,21 +232,19 @@ function importarCSV(e) {
           endereco,
           status: "Importado (CSV)",
         });
-        importados++;
 
-        console.log(
-          `🧾 Linha ${idx + 1}: Nome='${nome}' (coluna: ${nomeKey || "nenhuma"}), Celular='${celular}' (coluna: ${celularKey || "nenhuma"})`
-        );
+        importados++;
       });
 
       atualizarTabela();
       salvarLocal();
 
-      console.log(`✅ Importação concluída: ${importados} registros.`);
-      alert(`Importação concluída! ${importados} registros foram adicionados.`);
+      alert(
+        `✅ Importação concluída!\n\nRegistros adicionados: ${importados}\nIgnorados (Cancelado/Refeição): ${ignorados}`
+      );
     },
     error: function (err) {
-      console.error("❌ Erro ao processar CSV:", err);
+      console.error("❌ Erro ao importar CSV:", err);
       alert("Erro ao processar o CSV. Veja o console para detalhes.");
     },
   });
