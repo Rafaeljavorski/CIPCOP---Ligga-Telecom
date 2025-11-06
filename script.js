@@ -156,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (filtra Cancelado e Refeição Vespertina)
+// IMPORTAR CSV (corrige Refeição Vespertina)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -171,6 +171,7 @@ function importarCSV(e) {
 
       let importados = 0;
       let ignorados = 0;
+      let corrigidos = 0;
 
       res.data.forEach((row, idx) => {
         const linha = {};
@@ -183,19 +184,14 @@ function importarCSV(e) {
           linha[limpa] = String(row[chave] || "").trim();
         });
 
-        // Filtrar cancelados e refeições
         const statusAtividade = (linha["status da atividade"] || linha["status"] || "").toLowerCase();
-        if (
-          statusAtividade.includes("cancelado") ||
-          statusAtividade.includes("refeição") ||
-          statusAtividade.includes("refeição vespertina")
-        ) {
+        if (statusAtividade.includes("cancelado") || statusAtividade.includes("refeição")) {
           ignorados++;
           console.log(`⏭️ Linha ${idx + 1} ignorada (${statusAtividade})`);
           return;
         }
 
-        // Nome (inclui Nome Solicitante)
+        // Nome
         const nome =
           linha["nome"] ||
           linha["cliente"] ||
@@ -204,7 +200,7 @@ function importarCSV(e) {
           linha["nome contato encerramento"] ||
           "(Sem nome)";
 
-        // Celular / Telefone
+        // Celular
         const celular =
           linha["celular"] ||
           linha["telefone"] ||
@@ -226,11 +222,17 @@ function importarCSV(e) {
         const data =
           linha["data agendada"] || linha["data"] || linha["agendamento"] || "";
 
-        const periodo =
+        let periodo =
           linha["período agendado"] ||
           linha["periodo agendado"] ||
           linha["periodo"] ||
           "";
+
+        // 🟢 Corrige Refeição Vespertina
+        if (periodo.toLowerCase().includes("refeição vespertina")) {
+          periodo = "Tarde (13h–18h)";
+          corrigidos++;
+        }
 
         const endereco =
           linha["endereço"] ||
@@ -256,7 +258,7 @@ function importarCSV(e) {
       salvarLocal();
 
       alert(
-        `✅ Importação concluída!\n\nRegistros adicionados: ${importados}\nIgnorados (Cancelado/Refeição): ${ignorados}`
+        `✅ Importação concluída!\n\nRegistros adicionados: ${importados}\nIgnorados (Cancelado/Refeição): ${ignorados}\nCorrigidos (Refeição Vespertina): ${corrigidos}`
       );
     },
     error: function (err) {
