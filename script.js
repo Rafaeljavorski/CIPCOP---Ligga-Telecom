@@ -156,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (com filtro de Cancelado/Refeição)
+// IMPORTAR CSV (com "Nome Solicitante" e filtro Cancelado/Refeição)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -166,8 +166,8 @@ function importarCSV(e) {
     header: true,
     skipEmptyLines: true,
     complete: function (res) {
-      const camposOriginais = res.meta?.fields || Object.keys(res.data[0] || {});
-      console.log("📋 Cabeçalhos detectados:", camposOriginais);
+      const campos = res.meta?.fields || Object.keys(res.data[0] || {});
+      console.log("📋 Cabeçalhos detectados:", campos);
 
       let importados = 0;
       let ignorados = 0;
@@ -179,18 +179,25 @@ function importarCSV(e) {
           linha[limpa] = String(row[chave] || "").trim();
         });
 
-        // Ignora "Cancelado" e "Refeição"
+        // Ignorar "Cancelado" e "Refeição"
         const statusAtividade = (linha["status da atividade"] || linha["status"] || "").toLowerCase();
         if (statusAtividade.includes("cancelado") || statusAtividade.includes("refeição")) {
           ignorados++;
-          console.log(`⏭️ Ignorado linha ${idx + 1} (${statusAtividade})`);
+          console.log(`⏭️ Linha ${idx + 1} ignorada (${statusAtividade})`);
           return;
         }
 
-        // Nome e Celular com fallback
+        // Nome do cliente (adicionando Nome Solicitante)
         const nome =
-          linha["nome"] || linha["cliente"] || linha["nome solicitante"] linha["Nome Solicitante"] || "(Sem nome)";
+          linha["nome"] ||
+          linha["cliente"] ||
+          linha["nome solicitante"] ||
+          linha["solicitante nome"] ||
+          linha["responsável"] ||
+          linha["responsavel"] ||
+          "(Sem nome)";
 
+        // Celular / Telefone
         const celular =
           linha["celular"] ||
           linha["telefone"] ||
@@ -199,9 +206,9 @@ function importarCSV(e) {
           linha["telefone cliente"] ||
           linha["telefone 1"] ||
           linha["contato"] ||
-          
           "";
 
+        // Contrato
         const contrato =
           linha["contrato"] ||
           linha["nº contrato"] ||
@@ -209,6 +216,7 @@ function importarCSV(e) {
           linha["numero contrato"] ||
           "";
 
+        // Data / Período / Endereço
         const data =
           linha["data agendada"] || linha["data"] || linha["agendamento"] || "";
 
