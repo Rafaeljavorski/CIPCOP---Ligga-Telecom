@@ -3,7 +3,7 @@ let tipoMensagemAtual = "";
 let periodoEscolhido = "";
 
 // ===============================
-// Salvar e carregar clientes
+// SALVAR E CARREGAR CLIENTES
 // ===============================
 function salvarLocal() {
   localStorage.setItem("clientes", JSON.stringify(clientes));
@@ -29,11 +29,9 @@ function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
-  // Remove botões secundários anteriores
   const antigos = document.querySelector(".botoes-periodo");
   if (antigos) antigos.remove();
 
-  // Se for antecipação, cria botões secundários
   if (tipo === "antecipacao") {
     const container = document.querySelector(".botoes-mensagens");
     const div = document.createElement("div");
@@ -45,7 +43,6 @@ function selecionarTipoMensagem(tipo) {
     container.insertAdjacentElement("afterend", div);
   }
 
-  // Destaca o botão ativo
   document.querySelectorAll(".msg-btn").forEach((b) => b.classList.remove("ativo"));
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
 }
@@ -159,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (CORRIGIDO)
+// IMPORTAR CSV (SUPORTE TELEFONE SOLICITANTE)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -178,9 +175,7 @@ function importarCSV(e) {
           .toLowerCase()
       );
 
-      console.log("Cabeçalhos originais:", camposOriginais);
-      console.log("Cabeçalhos normalizados:", camposLimpos);
-
+      console.log("Cabeçalhos detectados:", camposLimpos);
       let importados = 0;
 
       res.data.forEach((row) => {
@@ -191,45 +186,59 @@ function importarCSV(e) {
             .replace(/^\uFEFF/, "")
             .trim()
             .toLowerCase();
-          linhaNormalizada[chaveLimpa] = row[chave];
+          linhaNormalizada[chaveLimpa] = String(row[chave] || "").trim();
         });
 
-        const nome = String(linhaNormalizada["nome"] || linhaNormalizada["cliente"] || "").trim();
-        const celular = String(
+        const nome =
+          linhaNormalizada["nome"] ||
+          linhaNormalizada["cliente"] ||
+          linhaNormalizada["responsável"] ||
+          linhaNormalizada["responsavel"] ||
+          linhaNormalizada["assinante"] ||
+          linhaNormalizada["usuario"] ||
+          "(Sem nome)";
+
+        const celular =
           linhaNormalizada["celular"] ||
-            linhaNormalizada["telefone"] ||
-            linhaNormalizada["telefone 1"] ||
-            ""
-        ).trim();
-        const contrato = String(
+          linhaNormalizada["telefone"] ||
+          linhaNormalizada["telefone 1"] ||
+          linhaNormalizada["telefone cliente"] ||
+          linhaNormalizada["telefone solicitante"] || // ✅ adicionado
+          linhaNormalizada["contato"] ||
+          linhaNormalizada["número"] ||
+          linhaNormalizada["numero"] ||
+          "";
+
+        const contrato =
           linhaNormalizada["contrato"] ||
-            linhaNormalizada["n° contrato"] ||
-            linhaNormalizada["nº contrato"] ||
-            ""
-        ).trim();
-        const data = String(
+          linhaNormalizada["n° contrato"] ||
+          linhaNormalizada["nº contrato"] ||
+          linhaNormalizada["num contrato"] ||
+          linhaNormalizada["numero contrato"] ||
+          "";
+
+        const data =
           linhaNormalizada["data agendada"] ||
-            linhaNormalizada["data"] ||
-            linhaNormalizada["agendamento"] ||
-            ""
-        ).trim();
-        const periodo = String(
+          linhaNormalizada["data"] ||
+          linhaNormalizada["agendamento"] ||
+          "";
+
+        const periodo =
           linhaNormalizada["período agendado"] ||
-            linhaNormalizada["periodo agendado"] ||
-            linhaNormalizada["periodo"] ||
-            ""
-        ).trim();
-        const endereco = String(
+          linhaNormalizada["periodo agendado"] ||
+          linhaNormalizada["periodo"] ||
+          "";
+
+        const endereco =
           linhaNormalizada["endereço"] ||
-            linhaNormalizada["endereco"] ||
-            linhaNormalizada["logradouro"] ||
-            ""
-        ).trim();
+          linhaNormalizada["endereco"] ||
+          linhaNormalizada["logradouro"] ||
+          "";
 
         clientes.push({
-          nome: nome || "(Sem nome)",
-          celular: celular || "",
-          contrato: contrato || "",
+          nome,
+          celular,
+          contrato,
           data,
           periodo,
           endereco,
