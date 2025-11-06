@@ -167,51 +167,70 @@ function importarCSV(e) {
     header: true,
     skipEmptyLines: true,
     complete: function (res) {
-      // log dos cabeçalhos detectados (útil para debug)
-      console.log("Campos detectados no CSV:", res.meta && res.meta.fields ? res.meta.fields : Object.keys(res.data[0] || {}));
+      // Corrige e limpa cabeçalhos com BOM, aspas e espaços
+      const camposOriginais = res.meta?.fields || Object.keys(res.data[0] || {});
+      const camposLimpos = camposOriginais.map((c) =>
+        String(c || "")
+          .replace(/["']/g, "") // remove aspas
+          .replace(/^\uFEFF/, "") // remove BOM
+          .trim()
+          .toLowerCase()
+      );
 
-      let ignorados = [];
+      console.log("Cabeçalhos originais:", camposOriginais);
+      console.log("Cabeçalhos normalizados:", camposLimpos);
+
       let importados = 0;
 
       res.data.forEach((row, rowIndex) => {
-        // Função auxiliar para buscar coluna ignorando maiúsculas/minúsculas, espaços e BOM
-        const getCol = (...nomes) => {
-          for (const nome of nomes) {
-            const chave = Object.keys(row).find((k) => {
-              if (!k) return false;
-              // remover BOM e normalizar
-              const keyClean = String(k).replace(/^\uFEFF/, "").trim().toLowerCase();
-              return keyClean === String(nome).trim().toLowerCase();
-            });
-            if (chave) {
-              // garante que o valor seja string antes de trim
-              return String(row[chave] === null || row[chave] === undefined ? "" : row[chave]).trim();
-            }
-          }
-          return "";
-        };
+        // normaliza chaves de linha também
+        const linhaNormalizada = {};
+        Object.keys(row).forEach((chave) => {
+          const chaveLimpa = String(chave || "")
+            .replace(/["']/g, "")
+            .replace(/^\uFEFF/, "")
+            .trim()
+            .toLowerCase();
+          linhaNormalizada[chaveLimpa] = row[chave];
+        });
 
-        const nome = getCol("Nome", "Cliente", "nome", "cliente");
-        const celular = getCol("Celular", "Telefone", "celular", "telefone");
-        const contrato = getCol("Contrato", "contrato", "Nº Contrato");
-        const data = getCol("Data agendada", "Data Agendada", "Data", "Agendamento", "Data de Agendamento");
-        const periodo = getCol("Período Agendado", "Periodo Agendado", "Período", "Periodo", "periodo");
-        const endereco = getCol("Endereço", "Endereco", "endereco");
+        const nome = String(linhaNormalizada["nome"] || linhaNormalizada["cliente"] || "").trim();
+        const celular = String(
+          linhaNormalizada["celular"] ||
+            linhaNormalizada["telefone"] ||
+            linhaNormalizada["telefone 1"] ||
+            ""
+        ).trim();
+        const contrato = String(
+          linhaNormalizada["contrato"] ||
+            linhaNormalizada["n° contrato"] ||
+            linhaNormalizada["nº contrato"] ||
+            ""
+        ).trim();
+        const data = String(
+          linhaNormalizada["data agendada"] ||
+            linhaNormalizada["data"] ||
+            linhaNormalizada["agendamento"] ||
+            ""
+        ).trim();
+        const periodo = String(
+          linhaNormalizada["período agendado"] ||
+            linhaNormalizada["periodo agendado"] ||
+            linhaNormalizada["periodo"] ||
+            ""
+        ).trim();
+        const endereco = String(
+          linhaNormalizada["endereço"] ||
+            linhaNormalizada["endereco"] ||
+            linhaNormalizada["logradouro"] ||
+            ""
+        ).trim();
 
-        // Se quiser importar mesmo sem celular, remova essa checagem ou ajuste conforme precisa
-        if (!contrato || !nome || !celular) {
-          ignorados.push({
-            row: rowIndex + 1,
-            motivo: !contrato ? "Falta contrato" : !nome ? "Falta nome" : "Falta celular",
-            conteudo: row,
-          });
-          return;
-        }
-
+        // adiciona mesmo se faltar nome/celular
         clientes.push({
-          nome,
-          celular,
-          contrato,
+          nome: nome || "(Sem nome)",
+          celular: celular || "",
+          contrato: contrato || "",
           data,
           periodo,
           endereco,
@@ -223,20 +242,16 @@ function importarCSV(e) {
       atualizarTabela();
       salvarLocal();
 
-      // relatório no console para depuração
-      console.log(`Importação finalizada. Importados: ${importados}. Ignorados: ${ignorados.length}.`);
-      if (ignorados.length) {
-        console.warn("Linhas ignoradas (mostrar até 20):", ignorados.slice(0, 20));
-      }
-
-      alert(`Importação concluída. Importados: ${importados}. Ignorados: ${ignorados.length} (veja console para detalhes).`);
+      console.log(`Importação concluída: ${importados} registros.`);
+      alert(`Importação concluída! ${importados} registros foram adicionados.`);
     },
-    error: function(err){
-      console.error("Erro ao parsear CSV:", err);
-      alert("Erro ao processar o CSV. Veja console para detalhes.");
-    }
+    error: function (err) {
+      console.error("Erro ao processar CSV:", err);
+      alert("Erro ao processar o CSV. Veja o console para detalhes.");
+    },
   });
 }
+
 
 
 
