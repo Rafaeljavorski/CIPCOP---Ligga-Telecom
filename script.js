@@ -156,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (com Nome Solicitante e filtro Cancelado/Refeição)
+// IMPORTAR CSV (filtra Cancelado e Refeição Vespertina)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -183,8 +183,13 @@ function importarCSV(e) {
           linha[limpa] = String(row[chave] || "").trim();
         });
 
+        // Filtrar cancelados e refeições
         const statusAtividade = (linha["status da atividade"] || linha["status"] || "").toLowerCase();
-        if (statusAtividade.includes("cancelado") || statusAtividade.includes("refeição")) {
+        if (
+          statusAtividade.includes("cancelado") ||
+          statusAtividade.includes("refeição") ||
+          statusAtividade.includes("refeição vespertina")
+        ) {
           ignorados++;
           console.log(`⏭️ Linha ${idx + 1} ignorada (${statusAtividade})`);
           return;
