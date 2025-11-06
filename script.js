@@ -29,7 +29,7 @@ function selecionarTipoMensagem(tipo) {
   tipoMensagemAtual = tipo;
   atualizarMensagemPadrao();
 
-  // Remove botões secundários anteriores (Manhã/Tarde/Manter)
+  // Remove botões secundários anteriores
   const antigos = document.querySelector(".botoes-periodo");
   if (antigos) antigos.remove();
 
@@ -50,7 +50,6 @@ function selecionarTipoMensagem(tipo) {
   document.querySelector(`.msg-btn[onclick*="${tipo}"]`)?.classList.add("ativo");
 }
 
-// Define o período escolhido e remove os botões
 function definirPeriodo(periodo) {
   periodoEscolhido = periodo === "Manter" ? "" : periodo;
   atualizarMensagemPadrao();
@@ -159,6 +158,9 @@ function enviarMensagem(i) {
   salvarLocal();
 }
 
+// ===============================
+// IMPORTAR CSV (CORRIGIDO)
+// ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
   if (!file) return alert("Arquivo não selecionado.");
@@ -167,12 +169,11 @@ function importarCSV(e) {
     header: true,
     skipEmptyLines: true,
     complete: function (res) {
-      // Corrige e limpa cabeçalhos com BOM, aspas e espaços
       const camposOriginais = res.meta?.fields || Object.keys(res.data[0] || {});
       const camposLimpos = camposOriginais.map((c) =>
         String(c || "")
-          .replace(/["']/g, "") // remove aspas
-          .replace(/^\uFEFF/, "") // remove BOM
+          .replace(/["']/g, "")
+          .replace(/^\uFEFF/, "")
           .trim()
           .toLowerCase()
       );
@@ -182,8 +183,7 @@ function importarCSV(e) {
 
       let importados = 0;
 
-      res.data.forEach((row, rowIndex) => {
-        // normaliza chaves de linha também
+      res.data.forEach((row) => {
         const linhaNormalizada = {};
         Object.keys(row).forEach((chave) => {
           const chaveLimpa = String(chave || "")
@@ -226,7 +226,6 @@ function importarCSV(e) {
             ""
         ).trim();
 
-        // adiciona mesmo se faltar nome/celular
         clientes.push({
           nome: nome || "(Sem nome)",
           celular: celular || "",
@@ -251,9 +250,6 @@ function importarCSV(e) {
     },
   });
 }
-
-
-
 
 // ===============================
 // EXPORTAR CSV
