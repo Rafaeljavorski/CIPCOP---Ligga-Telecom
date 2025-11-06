@@ -191,7 +191,7 @@ function importarCSV(e) {
         const nome =
           linha["nome"] ||
           linha["cliente"] ||
-          linha["nome solicitante"] ||
+          linha["Nome solicitante"] ||
           linha["solicitante nome"] ||
           linha["responsável"] ||
           linha["responsavel"] ||
@@ -201,7 +201,7 @@ function importarCSV(e) {
         const celular =
           linha["celular"] ||
           linha["telefone"] ||
-          linha["telefone solicitante"] ||
+          linha["Telefone do Solicitante"] ||
           linha["solicitante telefone"] ||
           linha["telefone cliente"] ||
           linha["telefone 1"] ||
@@ -210,7 +210,7 @@ function importarCSV(e) {
 
         // Contrato
         const contrato =
-          linha["contrato"] ||
+          linha["Contrato"] ||
           linha["nº contrato"] ||
           linha["n° contrato"] ||
           linha["numero contrato"] ||
