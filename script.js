@@ -156,7 +156,7 @@ function enviarMensagem(i) {
 }
 
 // ===============================
-// IMPORTAR CSV (SUPORTE TELEFONE SOLICITANTE)
+// IMPORTAR CSV (com detecção automática e depuração)
 // ===============================
 function importarCSV(e) {
   const file = e.target.files[0];
@@ -175,10 +175,12 @@ function importarCSV(e) {
           .toLowerCase()
       );
 
-      console.log("Cabeçalhos detectados:", camposLimpos);
+      console.log("📋 Cabeçalhos detectados no CSV:", camposOriginais);
+      console.log("📋 Cabeçalhos normalizados:", camposLimpos);
+
       let importados = 0;
 
-      res.data.forEach((row) => {
+      res.data.forEach((row, idx) => {
         const linhaNormalizada = {};
         Object.keys(row).forEach((chave) => {
           const chaveLimpa = String(chave || "")
@@ -189,25 +191,32 @@ function importarCSV(e) {
           linhaNormalizada[chaveLimpa] = String(row[chave] || "").trim();
         });
 
-        const nome =
-          linhaNormalizada["nome"] ||
-          linhaNormalizada["cliente"] ||
-          linhaNormalizada["responsável"] ||
-          linhaNormalizada["responsavel"] ||
-          linhaNormalizada["assinante"] ||
-          linhaNormalizada["usuario"] ||
-          "(Sem nome)";
+        const nomeKeys = [
+          "nome",
+          "cliente",
+          "responsável",
+          "responsavel",
+          "assinante",
+          "usuario",
+          "solicitante",
+        ];
+        const nomeKey = nomeKeys.find((k) => linhaNormalizada[k]) || "";
+        const nome = nomeKey ? linhaNormalizada[nomeKey] : "(Sem nome)";
 
-        const celular =
-          linhaNormalizada["celular"] ||
-          linhaNormalizada["telefone"] ||
-          linhaNormalizada["telefone 1"] ||
-          linhaNormalizada["telefone cliente"] ||
-          linhaNormalizada["telefone solicitante"] || // ✅ adicionado
-          linhaNormalizada["contato"] ||
-          linhaNormalizada["número"] ||
-          linhaNormalizada["numero"] ||
-          "";
+        const celularKeys = [
+          "celular",
+          "telefone",
+          "telefone 1",
+          "telefone cliente",
+          "telefone solicitante",
+          "solicitante telefone",
+          "telefone do solicitante",
+          "contato",
+          "número",
+          "numero",
+        ];
+        const celularKey = celularKeys.find((k) => linhaNormalizada[k]) || "";
+        const celular = celularKey ? linhaNormalizada[celularKey] : "";
 
         const contrato =
           linhaNormalizada["contrato"] ||
@@ -245,16 +254,20 @@ function importarCSV(e) {
           status: "Importado (CSV)",
         });
         importados++;
+
+        console.log(
+          `🧾 Linha ${idx + 1}: Nome='${nome}' (coluna: ${nomeKey || "nenhuma"}), Celular='${celular}' (coluna: ${celularKey || "nenhuma"})`
+        );
       });
 
       atualizarTabela();
       salvarLocal();
 
-      console.log(`Importação concluída: ${importados} registros.`);
+      console.log(`✅ Importação concluída: ${importados} registros.`);
       alert(`Importação concluída! ${importados} registros foram adicionados.`);
     },
     error: function (err) {
-      console.error("Erro ao processar CSV:", err);
+      console.error("❌ Erro ao processar CSV:", err);
       alert("Erro ao processar o CSV. Veja o console para detalhes.");
     },
   });
