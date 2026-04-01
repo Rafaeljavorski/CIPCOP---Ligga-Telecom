@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atendimento COP - Ligga Telecom</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+<h1>Atendimento COP - Ligga Telecom</h1>
+
+<div class="stats">
+  <div class="card aguardando"><strong>Aguardando</strong><p id="contAguardando">0</p></div>
+  <div class="card confirmado"><strong>Confirmados</strong><p id="contConfirmado">0</p></div>
+  <div class="card reagendado"><strong>Reagendados</strong><p id="contReagendado">0</p></div>
+  <div class="card cancelado"><strong>Cancelados</strong><p id="contCancelado">0</p></div>
+</div>
+
+<div class="input-area">
+  <div class="form-row">
+    <input id="cliente" placeholder="Nome do cliente">
+    <input id="celular" placeholder="Celular (somente números)">
+    <input id="contrato" placeholder="Número do Contrato">
+    <input id="data" type="date">
+    <select id="periodo">
+      <option value="">Período</option>
+      <option>Manhã</option>
+      <option>Tarde</option>
+    </select>
+    <input id="endereco" placeholder="Endereço do cliente">
+    <button onclick="adicionarCliente()">Adicionar</button>
+  </div>
+
+<!-- ===================================== -->
+<!-- SEÇÃO DE ESCOLHA DE TIPO DE MENSAGEM -->
+<!-- ===================================== -->
+
+<div class="botoes-mensagens" style="text-align: center; margin-bottom: 10px;">
+  <button class="msg-btn" onclick="selecionarTipoMensagem('antecipacao')">
+    📅 Mensagem de Antecipação
+  </button>
+  <button class="msg-btn" onclick="selecionarTipoMensagem('confirmacao')">
+    ✅ Mensagem de Confirmação
+  </button>
+  <button class="msg-btn" onclick="selecionarTipoMensagem('chegada')">
+    🚗 Aviso de Chegada do Técnico
+  </button>
+</div>
+
+<!-- ===================================== -->
+<!-- ÁREA DE VISUALIZAÇÃO DA MENSAGEM -->
+<!-- ===================================== -->
+
+<div class="mensagem-container" style="margin-top: 10px;">
+  <label for="mensagemPadrao" style="font-weight: bold;">Mensagem para o Cliente:</label>
+  <textarea id="mensagemPadrao" rows="8" style="width: 100%; margin-top: 5px;" readonly></textarea>
+</div>
+
+
+  <div class="top-buttons">
+    <button onclick="document.getElementById('arquivoCSV').click()">📥 Importar CSV</button>
+    <input type="file" id="arquivoCSV" accept=".csv" style="display:none" onchange="importarCSV(event)">
+    <button onclick="exportarCSV()">📊 Exportar Relatório</button>
+    <button onclick="excluirSelecionados()">🗑️ Excluir Selecionados</button>
+    <button onclick="abrirAbaWhatsApp()">🟢 Abrir WhatsApp Web</button>
+  </div>
+
+  <div class="search-bar">
+    <input id="buscaContrato" placeholder="🔍 Buscar por contrato..." oninput="filtrarPorContrato()">
+  </div>
+</div>
+
+<table id="tabela">
+  <thead>
+    <tr>
+      <th><input type="checkbox" id="selecionarTodos" onclick="selecionarTodosClientes(this)"></th>
+      <th>Cliente</th>
+      <th>Celular</th>
+      <th>Contrato</th>
+      <th>Data</th>
+      <th>Período</th>
+      <th>Endereço</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script src="script.js"></script>
+</body>
+</html>
