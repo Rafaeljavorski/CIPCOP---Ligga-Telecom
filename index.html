@@ -200,6 +200,7 @@ select.status-sel{border:1.5px solid var(--borda);border-radius:8px;padding:5px 
     <div class="ferramentas">
       <div class="busca"><input id="fBusca" placeholder="Buscar por nome, celular, contrato ou endereço…"></div>
       <button class="btn btn-verde" id="btnEnviarSelecionados">📨 Enviar aos selecionados</button>
+      <button class="btn btn-contorno" id="btnAbrirWhats" style="border-color:#BEE9CE;color:var(--verde)">🟢 Abrir WhatsApp Web</button>
       <button class="btn btn-contorno" id="btnImportar">📥 Importar CSV</button>
       <input type="file" id="arquivoCsv" accept=".csv,text/csv" hidden>
       <button class="btn btn-contorno" id="btnExportar">📊 Exportar relatório</button>
@@ -254,13 +255,38 @@ select.status-sel{border:1.5px solid var(--borda);border-radius:8px;padding:5px 
 
 <script>
 /* =====================================================================
-   CORREÇÃO DO WHATSAPP — GUIA ÚNICA REUTILIZADA
-   Antes: window.open(url, '_blank') → cada envio abria uma guia nova.
-   Agora: window.open(url, 'whatsLigga') → o navegador REUTILIZA sempre
-   a mesma guia nomeada, apenas trocando o contato/mensagem.
+   CORREÇÃO DEFINITIVA DO WHATSAPP — GUIA ÚNICA REUTILIZADA
+   Problema: navegadores modernos apagam o "nome" da guia quando ela
+   navega para outro site (o WhatsApp). Por isso, só usar
+   window.open(url, 'nome') volta a abrir guias novas.
+   Solução: guardamos a REFERÊNCIA da janela na primeira abertura e,
+   nos envios seguintes, navegamos a MESMA janela com
+   janela.location.href = url — isso o navegador sempre permite e a
+   guia nunca se multiplica nem fecha.
 ===================================================================== */
 const NOME_JANELA_WHATS = 'whatsLigga';
 let refJanelaWhats = null;
+
+function janelaWhatsAberta(){
+  try{ return !!refJanelaWhats && !refJanelaWhats.closed; }
+  catch(e){ return false; }
+}
+
+function navegarWhats(url){
+  // 1) Se a guia do WhatsApp já existe → só troca o endereço dela
+  if(janelaWhatsAberta()){
+    try{
+      refJanelaWhats.location.href = url;
+      try{ refJanelaWhats.focus(); }catch(e){}
+      return true;
+    }catch(e){ refJanelaWhats = null; /* referência perdida → reabre */ }
+  }
+  // 2) Primeira vez (ou guia foi fechada) → abre UMA guia e guarda a referência
+  refJanelaWhats = window.open(url, NOME_JANELA_WHATS);
+  if(refJanelaWhats){ try{ refJanelaWhats.focus(); }catch(e){} return true; }
+  aviso('Pop-up bloqueado! Permita pop-ups para este site.');
+  return false;
+}
 
 function abrirWhats(celular, mensagem){
   const num = normalizarCelular(celular);
@@ -270,11 +296,7 @@ function abrirWhats(celular, mensagem){
   const url = modo === 'web'
     ? `https://web.whatsapp.com/send?phone=${num}&text=${texto}`
     : `https://wa.me/${num}?text=${texto}`;
-  // Janela NOMEADA: reutiliza a mesma guia em todos os envios
-  refJanelaWhats = window.open(url, NOME_JANELA_WHATS);
-  if(refJanelaWhats){ refJanelaWhats.focus(); return true; }
-  aviso('Pop-up bloqueado! Permita pop-ups para este site.');
-  return false;
+  return navegarWhats(url);
 }
 
 function normalizarCelular(v){
@@ -461,6 +483,12 @@ document.querySelectorAll('.cartao').forEach(c => c.addEventListener('click', ()
   render();
 }));
 $('#fBusca').addEventListener('input', render);
+
+/* ===================== Abrir/conectar a guia do WhatsApp ===================== */
+$('#btnAbrirWhats').addEventListener('click', () => {
+  navegarWhats('https://web.whatsapp.com');
+  aviso('Guia do WhatsApp conectada — os envios usarão sempre esta guia.');
+});
 
 /* ===================== Fila de envio em massa =====================
    Cada clique em "Enviar próximo" abre o próximo cliente na MESMA
